@@ -645,6 +645,10 @@ dsda_config_t dsda_config[dsda_config_count] = {
     "use_mouse", dsda_config_use_mouse,
     CONF_BOOL(1), NULL, NOT_STRICT, I_InitMouse
   },
+  [dsda_config_mouse_menu_navigation] = {
+    "mouse_menu_navigation", dsda_config_mouse_menu_navigation,
+    CONF_BOOL(1), NULL, NOT_STRICT
+  },
   [dsda_config_mouse_sensitivity_horiz] = {
     "mouse_sensitivity_horiz", dsda_config_mouse_sensitivity_horiz,
     dsda_config_int, 0, INT_MAX, { 10 }, NULL, NOT_STRICT, G_UpdateMouseSensitivity

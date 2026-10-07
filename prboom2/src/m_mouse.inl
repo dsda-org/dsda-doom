@@ -1253,11 +1253,14 @@ static dboolean M_MouseResponder(event_t *ev)
 {
   int action = M_MouseWheelAction(ev);
 
+  if (!dsda_IntConfig(dsda_config_mouse_menu_navigation))
+    return false;
+
   if (!menuactive && !messageToPrint)
   {
     dboolean click_to_open_menu = (gamestate == GS_DEMOSCREEN ||
                                   reelplayback);
-  
+
     if (click_to_open_menu && ev->type == ev_mouse &&
         (ev->data1.i & MENU_MOUSE_LEFT))
     {

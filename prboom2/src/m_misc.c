@@ -185,6 +185,7 @@ cfg_def_t cfg_defs[] =
 
   SETTING_HEADING("Mouse settings"),
   MIGRATED_SETTING(dsda_config_use_mouse),
+  MIGRATED_SETTING(dsda_config_mouse_menu_navigation),
   MIGRATED_SETTING(dsda_config_mouse_stutter_correction),
   MIGRATED_SETTING(dsda_config_mouse_sensitivity_horiz),
   MIGRATED_SETTING(dsda_config_fine_sensitivity),
