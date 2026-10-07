@@ -48,8 +48,8 @@
 #define FRACBITS 16
 #define FRACUNIT (1<<FRACBITS)
 
-typedef int fixed_t;
-typedef unsigned int ufixed_t;
+typedef int32_t fixed_t;
+typedef uint32_t ufixed_t;
 
 /*
  * Absolute Value
@@ -87,6 +87,28 @@ inline static CONSTFUNC fixed_t FixedMul(fixed_t a, fixed_t b)
 inline static CONSTFUNC int64_t FixedMul64(int64_t a, int64_t b)
 {
   return a * b >> FRACBITS;
+}
+
+//
+// Fixed Point Addition, Subtraction, Absolute Value
+//
+
+inline static CONSTFUNC fixed_t FixedAdd(fixed_t a, fixed_t b)
+{
+  // wraparound addition without signed-overflow UB
+  return (fixed_t)((uint32_t)a + (uint32_t)b);
+}
+
+inline static fixed_t FixedSub(fixed_t a, fixed_t b)
+{
+    // wraparound subtraction without signed-overflow UB
+    return (fixed_t)((uint32_t)a - (uint32_t)b);
+}
+
+inline static fixed_t FixedAbs(fixed_t x)
+{
+    // avoid abs(INT32_MIN) UB
+    return x < 0 ? (fixed_t)((uint32_t)0 - (uint32_t)x) : x;
 }
 
 /*

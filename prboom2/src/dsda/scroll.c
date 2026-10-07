@@ -15,6 +15,7 @@
 //	DSDA Scroll
 //
 
+#include "m_fixed.h"
 #include "p_tick.h"
 #include "r_state.h"
 
@@ -117,15 +118,13 @@ static void dsda_UpdateFloorCarryScrollerPosition(scroll_t* s, fixed_t dx, fixed
 static void dsda_UpdateControlScroller(control_scroll_t* s) {
   fixed_t dx;
   fixed_t dy;
-  fixed_t height;
-  fixed_t delta;
 
   dx = s->scroll.dx;
   dy = s->scroll.dy;
 
   if (s->control != -1) {
-    height = sectors[s->control].floorheight + sectors[s->control].ceilingheight;
-    delta = height - s->last_height;
+    const fixed_t height = FixedAdd(sectors[s->control].floorheight, sectors[s->control].ceilingheight);
+    const fixed_t delta = FixedSub(height, s->last_height);
 
     s->last_height = height;
 
