@@ -1991,7 +1991,7 @@ static dboolean G_CheckSpot(int playernum, mapthing_t *mthing)
 /* BUG: an can end up negative, because mthing->angle is (signed) short.
  * We have to emulate original Doom's behaviour, deferencing past the start
  * of the array, into the previous array (finetangent) */
-    an = ( ANG45 * ((signed)mthing->angle/45) ) >> ANGLETOFINESHIFT;
+    an = FixedMul(ANG45, (signed)mthing->angle/45) >> ANGLETOFINESHIFT;
     xa = finecosine[an];
     ya = finesine[an];
 
