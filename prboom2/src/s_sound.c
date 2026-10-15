@@ -328,7 +328,7 @@ void S_StartSoundAtVolume(void *origin_p, int sfx_id, int volume, dboolean impor
   mobj_t *origin;
   mobj_t *listener;
 
-  if (raven) return Raven_S_StartSoundAtVolume(origin_p, sfx_id, volume, loop_timeout);
+  if (raven) RETURN(Raven_S_StartSoundAtVolume(origin_p, sfx_id, volume, loop_timeout));
 
   origin = (mobj_t *) origin_p;
   listener = GetSoundListener();
@@ -506,7 +506,7 @@ void S_StopSound(void *origin)
 {
   int cnum;
 
-  if (raven) return Heretic_S_StopSound(origin);
+  if (raven) RETURN(Heretic_S_StopSound(origin));
 
   //jff 1/22/98 return if sound is not enabled
   if (nosfxparm)
@@ -860,9 +860,9 @@ int S_AdjustSoundParams(mobj_t *listener, mobj_t *source, channel_t *channel, sf
   approx_dist >>= FRACBITS;
 
   if (params->attenuation)
-    approx_dist *= params->attenuation;
+    approx_dist = (ufixed_t)(approx_dist * params->attenuation);
 
-  if (approx_dist >= max_snd_dist)
+  if (approx_dist >= (ufixed_t)max_snd_dist)
     return 0;
 
   // angle of source to listener
@@ -893,7 +893,7 @@ int S_AdjustSoundParams(mobj_t *listener, mobj_t *source, channel_t *channel, sf
   {
     params->volume = (soundCurve[approx_dist] * sfx_volume * 8) >> 7;
     if (params->volume_factor) {
-      params->volume *= params->volume_factor;
+      params->volume = (int)(params->volume * params->volume_factor);
       if (params->volume > 119)
         params->volume = 119;
     }

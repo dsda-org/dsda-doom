@@ -630,7 +630,7 @@ static void AM_SetScale(dboolean keep_scale)
     if (automap_full && old_m_w > 0)
     {
       scale_mtof = FixedDiv(f_w << FRACBITS, old_m_w);
-      scale_mtof = BETWEEN(min_scale_mtof, max_scale_mtof, scale_mtof);
+      scale_mtof = CLAMP(scale_mtof, min_scale_mtof, max_scale_mtof);
       scale_ftom = FixedDiv(FRACUNIT, scale_mtof);
     }
   }
@@ -2093,7 +2093,7 @@ static void AM_drawPlayers(void)
 #endif
 
   if (map_things_appearance == map_things_appearance_scaled)
-    scale = (BETWEEN(4<<FRACBITS, 256<<FRACBITS, plr->mo->radius)>>FRACTOMAPBITS);
+    scale = (CLAMP(plr->mo->radius, 4<<FRACBITS, 256<<FRACBITS)>>FRACTOMAPBITS);
   else
     scale = 16<<MAPBITS;
 
@@ -2254,7 +2254,7 @@ static void AM_ProcessNiceThing(mobj_t* mobj, angle_t angle, fixed_t x, fixed_t 
     }
     g = 0;
     b = 0;
-    radius = BETWEEN(4<<FRACBITS, 256<<FRACBITS, mobj->radius);
+    radius = CLAMP(mobj->radius, 4<<FRACBITS, 256<<FRACBITS);
     rotate = true;
   }
   else
@@ -2377,7 +2377,7 @@ static void AM_DrawNiceThings(void)
 
     // do not want to have too small marks
     radius = MTOF_F(16 << MAPBITS);
-    radius = BETWEEN(8.0f, 128.0f, radius);
+    radius = CLAMP(radius, 8.0f, 128.0f);
 
     for (i = 0; i < markpointnum; i++) // killough 2/22/98: remove automap mark limit
     {
@@ -2473,7 +2473,7 @@ static void AM_drawThings(void)
 
       if (map_things_appearance == map_things_appearance_scaled
         || map_things_appearance == map_things_appearance_box)
-        scale = (BETWEEN(4<<FRACBITS, 256<<FRACBITS, t->radius)>>FRACTOMAPBITS);// * 16 / 20;
+        scale = (CLAMP(t->radius, 4<<FRACBITS, 256<<FRACBITS)>>FRACTOMAPBITS);// * 16 / 20;
       else
         scale = 16<<MAPBITS;
 

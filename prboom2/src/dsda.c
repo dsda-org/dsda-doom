@@ -223,9 +223,11 @@ void dsda_DisplayNotifications(void) {
 }
 
 void dsda_DecomposeILTime(dsda_level_time_t* level_time) {
+  double t = round(100.f * (dsda_last_leveltime % 35) / 35);
+
   level_time->m = dsda_last_leveltime / 35 / 60;
   level_time->s = (dsda_last_leveltime % (60 * 35)) / 35;
-  level_time->t = round(100.f * (dsda_last_leveltime % 35) / 35);
+  level_time->t = (int)t;
 }
 
 void dsda_DecomposeMovieTime(dsda_movie_time_t* total_time) {

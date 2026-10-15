@@ -2408,8 +2408,8 @@ void A_Scream(mobj_t *actor)
 {
   int sound;
 
-  if (heretic) return Heretic_A_Scream(actor);
-  if (hexen) return Hexen_A_Scream(actor);
+  if (heretic)  RETURN(Heretic_A_Scream(actor));
+  if (hexen)    RETURN(Hexen_A_Scream(actor));
 
   switch (actor->info->deathsound)
     {
@@ -2634,7 +2634,7 @@ void A_BossDeath(mobj_t *mo)
   }
 
   // heretic_note: probably we can adopt the clean heretic style and merge
-  if (heretic) return Heretic_A_BossDeath(mo);
+  if (heretic) RETURN(Heretic_A_BossDeath(mo));
 
   if (gamemode == commercial)
   {
@@ -3215,14 +3215,14 @@ void A_SpawnObject(mobj_t *actor)
   if (!mbf21 || !actor->state->args[0])
     return;
 
-  type  = actor->state->args[0] - 1;
-  angle = actor->state->args[1];
-  ofs_x = actor->state->args[2];
-  ofs_y = actor->state->args[3];
-  ofs_z = actor->state->args[4];
-  vel_x = actor->state->args[5];
-  vel_y = actor->state->args[6];
-  vel_z = actor->state->args[7];
+  type  = (int)actor->state->args[0] - 1;
+  angle = (int)actor->state->args[1];
+  ofs_x = (int)actor->state->args[2];
+  ofs_y = (int)actor->state->args[3];
+  ofs_z = (int)actor->state->args[4];
+  vel_x = (int)actor->state->args[5];
+  vel_y = (int)actor->state->args[6];
+  vel_z = (int)actor->state->args[7];
 
   // calculate position offsets
   an = actor->angle + (unsigned int)(((int64_t)angle << 16) / 360);
@@ -3282,11 +3282,11 @@ void A_MonsterProjectile(mobj_t *actor)
   if (!mbf21 || !actor->target || !actor->state->args[0])
     return;
 
-  type        = actor->state->args[0] - 1;
-  angle       = actor->state->args[1];
-  pitch       = actor->state->args[2];
-  spawnofs_xy = actor->state->args[3];
-  spawnofs_z  = actor->state->args[4];
+  type        = (int)actor->state->args[0] - 1;
+  angle       = (int)actor->state->args[1];
+  pitch       = (int)actor->state->args[2];
+  spawnofs_xy = (int)actor->state->args[3];
+  spawnofs_z  = (int)actor->state->args[4];
 
   A_FaceTarget(actor);
   mo = P_SpawnMissile(actor, actor->target, type);
@@ -3332,11 +3332,11 @@ void A_MonsterBulletAttack(mobj_t *actor)
   if (!mbf21 || !actor->target)
     return;
 
-  hspread    = actor->state->args[0];
-  vspread    = actor->state->args[1];
-  numbullets = actor->state->args[2];
-  damagebase = actor->state->args[3];
-  damagemod  = actor->state->args[4];
+  hspread    = (int)actor->state->args[0];
+  vspread    = (int)actor->state->args[1];
+  numbullets = (int)actor->state->args[2];
+  damagebase = (int)actor->state->args[3];
+  damagemod  = (int)actor->state->args[4];
 
   A_FaceTarget(actor);
   S_StartMobjSound(actor, actor->info->attacksound);
@@ -3369,10 +3369,10 @@ void A_MonsterMeleeAttack(mobj_t *actor)
   if (!mbf21 || !actor->target)
     return;
 
-  damagebase = actor->state->args[0];
-  damagemod  = actor->state->args[1];
-  hitsound   = actor->state->args[2];
-  range      = actor->state->args[3];
+  damagebase = (int)actor->state->args[0];
+  damagemod  = (int)actor->state->args[1];
+  hitsound   = (int)actor->state->args[2];
+  range      = (int)actor->state->args[3];
 
   if (range == 0)
     range = actor->info->meleerange;
@@ -3400,7 +3400,7 @@ void A_RadiusDamage(mobj_t *actor)
   if (!mbf21 || !actor->state)
     return;
 
-  P_RadiusAttack(actor, actor->target, actor->state->args[0], actor->state->args[1], BF_DAMAGESOURCE);
+  P_RadiusAttack(actor, actor->target, (int)actor->state->args[0], (int)actor->state->args[1], BF_DAMAGESOURCE);
 }
 
 //
@@ -3428,8 +3428,8 @@ void A_HealChase(mobj_t* actor)
   if (!mbf21 || !actor)
     return;
 
-  state = actor->state->args[0];
-  sound = actor->state->args[1];
+  state = (int)actor->state->args[0];
+  sound = (int)actor->state->args[1];
 
   if (!P_HealCorpse(actor, actor->info->radius, state, sound))
     A_Chase(actor);
@@ -3448,8 +3448,8 @@ void A_SeekTracer(mobj_t *actor)
   if (!mbf21 || !actor)
     return;
 
-  threshold    = FixedToAngle(actor->state->args[0]);
-  maxturnangle = FixedToAngle(actor->state->args[1]);
+  threshold    = FixedToAngle((fixed_t)actor->state->args[0]);
+  maxturnangle = FixedToAngle((fixed_t)actor->state->args[1]);
 
   P_SeekerMissile(actor, &actor->tracer, threshold, maxturnangle, true);
 }
@@ -3468,8 +3468,8 @@ void A_FindTracer(mobj_t *actor)
   if (!mbf21 || !actor || actor->tracer)
     return;
 
-  fov  = FixedToAngle(actor->state->args[0]);
-  dist =             (actor->state->args[1]);
+  fov  = FixedToAngle((fixed_t)actor->state->args[0]);
+  dist =             ((int)actor->state->args[1]);
 
   P_SetTarget(&actor->tracer, P_RoughTargetSearch(actor, fov, dist));
 }
@@ -3499,8 +3499,8 @@ void A_JumpIfHealthBelow(mobj_t* actor)
   if (!mbf21 || !actor)
     return;
 
-  state  = actor->state->args[0];
-  health = actor->state->args[1];
+  state  = (int)actor->state->args[0];
+  health = (int)actor->state->args[1];
 
   if (actor->health < health)
     P_SetMobjState(actor, state);
@@ -3520,8 +3520,8 @@ void A_JumpIfTargetInSight(mobj_t* actor)
   if (!mbf21 || !actor || !actor->target)
     return;
 
-  state =             (actor->state->args[0]);
-  fov   = FixedToAngle(actor->state->args[1]);
+  state =             ((int)actor->state->args[0]);
+  fov   = FixedToAngle((fixed_t)actor->state->args[1]);
 
   // Check FOV first since it's faster
   if (fov > 0 && !P_CheckFov(actor, actor->target, fov))
@@ -3544,8 +3544,8 @@ void A_JumpIfTargetCloser(mobj_t* actor)
   if (!mbf21 || !actor || !actor->target)
     return;
 
-  state    = actor->state->args[0];
-  distance = actor->state->args[1];
+  state    = (int)actor->state->args[0];
+  distance = (int)actor->state->args[1];
 
   if (distance > P_AproxDistance(actor->x - actor->target->x,
                                  actor->y - actor->target->y))
@@ -3566,8 +3566,8 @@ void A_JumpIfTracerInSight(mobj_t* actor)
   if (!mbf21 || !actor || !actor->tracer)
     return;
 
-  state =             (actor->state->args[0]);
-  fov   = FixedToAngle(actor->state->args[1]);
+  state =             ((int)actor->state->args[0]);
+  fov   = FixedToAngle((fixed_t)actor->state->args[1]);
 
   // Check FOV first since it's faster
   if (fov > 0 && !P_CheckFov(actor, actor->tracer, fov))
@@ -3590,8 +3590,8 @@ void A_JumpIfTracerCloser(mobj_t* actor)
   if (!mbf21 || !actor || !actor->tracer)
     return;
 
-  state    = actor->state->args[0];
-  distance = actor->state->args[1];
+  state    = (int)actor->state->args[0];
+  distance = (int)actor->state->args[1];
 
   if (distance > P_AproxDistance(actor->x - actor->tracer->x,
                                  actor->y - actor->tracer->y))
@@ -3613,7 +3613,7 @@ void A_JumpIfFlagsSet(mobj_t* actor)
   if (!mbf21 || !actor)
     return;
 
-  state  = actor->state->args[0];
+  state  = (int)actor->state->args[0];
   flags  = actor->state->args[1];
   flags2 = actor->state->args[2];
 
@@ -5447,7 +5447,7 @@ void A_PigPain(mobj_t * actor)
     A_Pain(actor);
     if (actor->z <= actor->floorz)
     {
-        actor->momz = 3.5 * FRACUNIT;
+        actor->momz = (fixed_t)(3.5 * FRACUNIT);
     }
 }
 
@@ -6525,7 +6525,7 @@ static void DragonSeek(mobj_t * actor, angle_t thresh, angle_t turnMax)
                 }
                 angleToSpot = R_PointToAngle2(actor->x, actor->y,
                                               mo_x, mo_y);
-                if (abs((int)(angleToSpot - angleToTarget)) < bestAngle)
+                if ((angle_t)abs((int) angleToSpot - (int) angleToTarget) < bestAngle)
                 {
                     bestAngle = abs((int)(angleToSpot - angleToTarget));
                     bestArg = i;
@@ -7461,7 +7461,7 @@ void A_IceGuyMissileExplode(mobj_t * actor)
     for (i = 0; i < 8; i++)
     {
         mo = P_SpawnMissileAngle(actor, HEXEN_MT_ICEGUY_FX2, i * ANG45,
-                                 -0.3 * FRACUNIT);
+                                 (fixed_t)(-0.3 * FRACUNIT));
         if (mo)
         {
             P_SetTarget(&mo->target, actor->target);

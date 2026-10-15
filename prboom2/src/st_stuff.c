@@ -746,7 +746,7 @@ static void ST_updateWidgets(void)
 
 void ST_Ticker(void)
 {
-  if (raven) return SB_Ticker();
+  if (raven) RETURN(SB_Ticker());
 
   st_clock++;
   st_randomnumber = M_Random();
@@ -1207,7 +1207,7 @@ static dboolean st_stopped = true;
 
 void ST_Start(void)
 {
-  if (raven) return SB_Start();
+  if (raven) RETURN(SB_Start());
 
   if (!st_stopped)
     ST_Stop();
@@ -1226,7 +1226,7 @@ static void ST_Stop(void)
 
 void ST_Init(void)
 {
-  if (raven) return SB_Init();
+  if (raven) RETURN(SB_Init());
 
   veryfirsttime = 0;
   ST_loadGraphics();

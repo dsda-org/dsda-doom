@@ -209,7 +209,7 @@ char *Z_Strdup(const char *s)
 
 void Z_FreeLevel(void)
 {
-  return Z_FreeTag(ZONE_LEVEL);
+  RETURN(Z_FreeTag(ZONE_LEVEL));
 }
 
 void *Z_MallocLevel(size_t size)

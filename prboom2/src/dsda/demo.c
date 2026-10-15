@@ -179,7 +179,7 @@ char* dsda_FailedDemoName(void) {
 }
 
 static int dsda_DemoBufferOffset(void) {
-  return dsda_demo_write_buffer_p - dsda_demo_write_buffer;
+  return (int)(dsda_demo_write_buffer_p - dsda_demo_write_buffer);
 }
 
 int dsda_BytesPerTic(void) {
@@ -452,9 +452,9 @@ void dsda_GetDemoCheckSum(dsda_cksum_t* cksum, byte* features, size_t feature_sl
 
   MD5Init(&md5);
 
-  MD5Update(&md5, demo, demo_size);
+  MD5Update(&md5, demo, (int)demo_size);
 
-  MD5Update(&md5, features, feature_slots);
+  MD5Update(&md5, features, (int)feature_slots);
 
   MD5Final(cksum->bytes, &md5);
 
@@ -474,7 +474,7 @@ static int dsda_ExportDemoToFile(const char* demo_name) {
   byte end_marker = DEMOMARKER;
   int length;
 
-  end_marker_location = dsda_demo_write_buffer_p - dsda_demo_write_buffer;
+  end_marker_location = (int)(dsda_demo_write_buffer_p - dsda_demo_write_buffer);
 
   dsda_WriteToDemo(&end_marker, 1);
 
@@ -669,7 +669,7 @@ static const byte* dsda_ReadDSDADemoHeader(const byte* demo_p, const byte* heade
   dsda_demo_version = 0;
 
   // 7 = 6 (signature) + 1 (dsda version)
-  if (demo_p - header_p + 7 > size)
+  if ((size_t)(demo_p - header_p) + 7 > size)
     return NULL;
 
   if (*demo_p++ != 0x1d)
@@ -688,7 +688,7 @@ static const byte* dsda_ReadDSDADemoHeader(const byte* demo_p, const byte* heade
   if (dsda_demo_version > DSDA_DEMO_VERSION)
     return NULL;
 
-  if (demo_p - header_p + dsda_demo_header_data_size[dsda_demo_version] > size)
+  if ((size_t)(demo_p - header_p) + dsda_demo_header_data_size[dsda_demo_version] > size)
     return NULL;
 
   dsda_demo_header_data.end_marker_location = dsda_ReadIntFromHeader(demo_p);
@@ -718,7 +718,7 @@ static const byte* dsda_ReadDSDADemoHeader(const byte* demo_p, const byte* heade
 // Strip off the defunct extended header (if we understand it) or abort (if we don't)
 static const byte* dsda_ReadUMAPINFODemoHeader(const byte* demo_p, const byte* header_p, size_t size) {
   // 9 = 6 (signature) + 1 (version) + 2 (extension count)
-  if (demo_p - header_p + 9 > size)
+  if ((size_t)(demo_p - header_p) + 9 > size)
     return NULL;
 
   if (strncmp((const char *)demo_p, "PR+UM", 5) != 0)
@@ -734,14 +734,14 @@ static const byte* dsda_ReadUMAPINFODemoHeader(const byte* demo_p, const byte* h
   if (*demo_p++ != 1 || *demo_p++ != 0)
     I_Error("G_ReadDemoHeader: Unknown demo format");
 
-  if (demo_p - header_p + 1 > size)
+  if ((size_t)(demo_p - header_p) + 1 > size)
     return NULL;
 
   // the defunct extension had length 8
   if (*demo_p++ != 8)
     I_Error("G_ReadDemoHeader: Unknown demo format");
 
-  if (demo_p - header_p + 8 > size)
+  if ((size_t)(demo_p - header_p) + 8 > size)
     return NULL;
 
   if (strncmp((const char *)demo_p, "UMAPINFO", 8))
@@ -750,7 +750,7 @@ static const byte* dsda_ReadUMAPINFODemoHeader(const byte* demo_p, const byte* h
   demo_p += 8;
 
   // the defunct extension stored the map lump (unused)
-  if (demo_p - header_p + 8 > size)
+  if ((size_t)(demo_p - header_p) + 8 > size)
     return NULL;
 
   demo_p += 8;
@@ -784,7 +784,7 @@ void dsda_WriteDSDADemoHeader(byte** p) {
   *demo_p++ = DSDA_DEMO_VERSION;
 
   dsda_demo_version = DSDA_DEMO_VERSION;
-  dsda_extra_demo_header_data_offset = demo_p - *p;
+  dsda_extra_demo_header_data_offset = (int)(demo_p - *p);
   memset(demo_p, 0, dsda_demo_header_data_size[dsda_demo_version]);
 
   if (dsda_AllowCasualExCmdFeatures())

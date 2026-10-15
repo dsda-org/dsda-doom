@@ -1855,7 +1855,7 @@ int EV_BuildZDoomStairs(int tag, stair_e type, line_t *line, fixed_t stairsize,
             continue;
           }
 
-          newsecnum = tsec - sectors;
+          newsecnum = (int)(tsec - sectors);
         }
       }
       else

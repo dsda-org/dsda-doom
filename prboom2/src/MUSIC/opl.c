@@ -249,11 +249,11 @@ void OPL_Render_Samples (void *dest, unsigned buffer_len)
         }
 
         // Add emulator output to buffer.
-        OPL3_GenerateStream(&opl_chip, buffer + filled * 2, nsamples);
-        filled += nsamples;
+        OPL3_GenerateStream(&opl_chip, buffer + filled * 2, (uint32_t)nsamples);
+        filled += (unsigned int)nsamples;
 
         // Invoke callbacks for this point in time.
-        OPL_AdvanceTime(nsamples);
+        OPL_AdvanceTime((unsigned int)nsamples);
     }
 }
 

@@ -251,7 +251,7 @@ void dsda_StoreKeyFrame(dsda_key_frame_t* key_frame, byte complete, byte export)
   if (key_frame->buffer != NULL) Z_Free(key_frame->buffer);
 
   key_frame->buffer = savebuffer;
-  key_frame->buffer_length = save_p - savebuffer;
+  key_frame->buffer_length = (int)(save_p - savebuffer);
 
   P_ForgetSaveBuffer();
 

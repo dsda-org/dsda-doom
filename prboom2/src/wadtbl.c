@@ -81,7 +81,7 @@ void AddPWADTableLump(wadtbl_t *wadtbl, const char *name, const byte* data, size
     wadtbl->lumps = Z_Realloc(wadtbl->lumps, (lumpnum + 1) * sizeof(wadtbl->lumps[0]));
 
     memcpy(wadtbl->lumps[lumpnum].name, name, 8);
-    wadtbl->lumps[lumpnum].size = size;
+    wadtbl->lumps[lumpnum].size = (int)size;
     wadtbl->lumps[lumpnum].filepos = wadtbl->header.infotableofs;
 
     wadtbl->header.numlumps++;
@@ -92,9 +92,9 @@ void AddPWADTableLump(wadtbl_t *wadtbl, const char *name, const byte* data, size
     wadtbl->data = Z_Realloc(wadtbl->data, wadtbl->datasize + size);
 
     memcpy(wadtbl->data + wadtbl->datasize, data, size);
-    wadtbl->datasize += size;
+    wadtbl->datasize += (int)size;
 
-    wadtbl->header.infotableofs += size;
+    wadtbl->header.infotableofs += (int)size;
   }
 }
 

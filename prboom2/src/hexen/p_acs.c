@@ -323,7 +323,7 @@ static int ReadCodeInt(void)
     int result;
     const int *ptr;
 
-    ACSAssert(PCodeOffset + 3 < ActionCodeSize,
+    ACSAssert((int)PCodeOffset + 3 < ActionCodeSize,
               "unexpectedly reached end of ACS lump");
 
     ptr = (const int *) (ActionCodeBase + PCodeOffset);

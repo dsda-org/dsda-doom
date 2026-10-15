@@ -106,9 +106,9 @@ static void EvaluateExTextScale(void) {
 
   ex_text_scale_y *= ex_text_scale_x;
 
-  ex_text_screenwidth = 320 * ex_text_scale_x;
-  ex_text_screenheight = 200 * ex_text_scale_y;
-  ex_text_st_scaled_height = g_st_height * ex_text_scale_y;
+  ex_text_screenwidth      = (int)(320 * ex_text_scale_x);
+  ex_text_screenheight     = (int)(200 * ex_text_scale_y);
+  ex_text_st_scaled_height = (int)(g_st_height * ex_text_scale_y);
 }
 
 stretch_param_t* dsda_StretchParams(int flags) {
@@ -145,8 +145,8 @@ static void InitExTextParam(stretch_param_t* offsets, enum patch_translation_e f
 
 void dsda_UpdateExTextOffset(enum patch_translation_e flags, int offset) {
   stretch_params_table[patch_stretch_ex_text][flags].deltay1 +=
-    (ST_SCALED_HEIGHT - ex_text_st_scaled_height) * offset * hud_font.line_height / g_st_height +
-    (hud_font.line_height - exhud_font.line_height) * ex_text_scale_y * (offset > 0 ? 1 : -1);
+    (int)((ST_SCALED_HEIGHT - ex_text_st_scaled_height) * offset * hud_font.line_height / g_st_height +
+    (hud_font.line_height - exhud_font.line_height) * ex_text_scale_y * (offset > 0 ? 1 : -1));
 }
 
 void dsda_ResetExTextOffsets(void) {

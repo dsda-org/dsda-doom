@@ -282,7 +282,7 @@ const lighttable_t** GetLightTable(int lightlevel)
 
   lightnum = (lightlevel >> LIGHTSEGSHIFT) + (extralight * LIGHTBRIGHT);
 
-  return scalelight[BETWEEN(0, LIGHTLEVELS - 1, lightnum)];
+  return scalelight[CLAMP(lightnum, 0, LIGHTLEVELS - 1)];
 }
 
 static void R_UpdateWallLights(int lightlevel)
@@ -691,7 +691,7 @@ void R_StoreWallRange(const int start, const int stop)
 
   if (ds_p == drawsegs+maxdrawsegs)   // killough 1/98 -- fix 2s line HOM
   {
-    unsigned pos = ds_p - drawsegs; // jff 8/9/98 fix from ZDOOM1.14a
+    unsigned pos = (unsigned int)(ds_p - drawsegs); // jff 8/9/98 fix from ZDOOM1.14a
     unsigned newmax = maxdrawsegs ? maxdrawsegs*2 : 128; // killough
     drawsegs = Z_Realloc(drawsegs,newmax*sizeof(*drawsegs));
     ds_p = drawsegs + pos;          // jff 8/9/98 fix from ZDOOM1.14a
@@ -733,7 +733,7 @@ void R_StoreWallRange(const int start, const int stop)
   len = curline->halflength; // No need to shift
 
   dist = (((dy * dx1 - dx * dy1) / len) << shift_bits);
-  rw_distance = (fixed_t)BETWEEN(INT_MIN, INT_MAX, dist);
+  rw_distance = (fixed_t)CLAMP(dist, INT_MIN, INT_MAX);
 
   ds_p->x1 = rw_x = start;
   ds_p->x2 = stop;

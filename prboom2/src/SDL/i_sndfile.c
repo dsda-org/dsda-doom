@@ -37,7 +37,7 @@ static sf_count_t sfvio_get_filelen(void *user_data)
 static sf_count_t sfvio_seek(sf_count_t offset, int whence, void *user_data)
 {
   MEMFILE *fs = user_data;
-  mem_fseek(fs, offset, whence);
+  mem_fseek(fs, (long)offset, whence);
   return mem_ftell(fs);
 }
 
@@ -110,7 +110,7 @@ void *Load_SNDFile(const void *data, SDL_AudioSpec *sample, void **sampledata,
       break;
   }
 
-  local_samplelen = sfinfo.frames * sfinfo.channels * (float_format ? sizeof(float) : sizeof(short));
+  local_samplelen = (Uint32)(sfinfo.frames * sfinfo.channels * (float_format ? sizeof(float) : sizeof(short)));
   local_sampledata = Z_Malloc(local_samplelen);
 
   if (float_format)

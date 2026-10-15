@@ -1421,8 +1421,8 @@ dboolean G_Responder (event_t* ev)
     case ev_move_analog:
       dsda_WatchGameControllerEvent();
 
-      left_analog_x = dsda_StrictMode() ? lroundf(ev->data1.f * 0.5f) * 2 : ev->data1.f;
-      left_analog_y = ev->data2.f;
+      left_analog_x = (int)(dsda_StrictMode() ? lroundf(ev->data1.f * 0.5f) * 2 : ev->data1.f);
+      left_analog_y = (int)ev->data2.f;
       return true;    // eat events
 
     case ev_look_analog:
@@ -2039,7 +2039,7 @@ static dboolean G_CheckSpot(int playernum, mapthing_t *mthing)
 //
 void G_DeathMatchSpawnPlayer (int playernum)
 {
-  int j, selections = deathmatch_p - deathmatchstarts;
+  int j, selections = (int)(deathmatch_p - deathmatchstarts);
 
   if (selections < g_maxplayers)
     I_Error("G_DeathMatchSpawnPlayer: Only %i deathmatch spots, %d required",
@@ -2069,7 +2069,7 @@ void G_DoReborn (int playernum)
   dsda_WatchReborn(playernum);
 
   if (hexen)
-    return Hexen_G_DoReborn(playernum);
+    RETURN(Hexen_G_DoReborn(playernum));
 
   // TODO: possible "allow respawn" mapinfo flag
   if (!netgame && !(skill_info.flags & SI_PLAYER_RESPAWN))

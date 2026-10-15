@@ -615,7 +615,7 @@ void M_SaveDefaults (void)
   for (i = 0; i < input_def_count; i++) {
     int len;
 
-    len = strlen(input_defs[i].name);
+    len = (int)strlen(input_defs[i].name);
     if (len > maxlen && len < 80)
       maxlen = len;
   }
@@ -741,7 +741,7 @@ void M_LoadDefaults (void)
         if (strparm[0] == '"')
         {
           // get a string
-          len = strlen(strparm);
+          len = (int)strlen(strparm);
           newstring = Z_Malloc(len);
           strparm[len - 1] = 0; // clears trailing double-quote mark
           strcpy(newstring, strparm + 1); // clears leading double-quote mark
@@ -863,7 +863,7 @@ const char* M_CheckWritableDir(const char *dir)
   const char *result = NULL;
   int len;
 
-  if (!dir || !(len = strlen(dir)))
+  if (!dir || !(len = (int)strlen(dir)))
   {
     return NULL;
   }

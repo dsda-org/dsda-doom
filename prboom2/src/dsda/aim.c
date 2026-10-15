@@ -24,7 +24,7 @@
 
 angle_t dsda_PlayerPitch(player_t* player)
 {
-  return dsda_FreeAim() ? player->mo->pitch : -(angle_t)(player->lookdir * ANG1 / M_PI);
+  return dsda_FreeAim() ? player->mo->pitch : (angle_t)-(player->lookdir * ANG1 / M_PI);
 }
 
 fixed_t dsda_PlayerSlope(player_t* player)

@@ -126,7 +126,7 @@ static void dsda_OpenGhostFile(const char* ghost_name, dsda_ghost_file_t* ghost_
   if (ghost_file->fstream == NULL)
     I_Error("dsda_OpenGhostImport: failed to open %s", ghost_name);
 
-  read_result = fread(&ghost_file->version, sizeof(int), 1, ghost_file->fstream);
+  read_result = (int)fread(&ghost_file->version, sizeof(int), 1, ghost_file->fstream);
   if (ghost_file->version < DSDA_GHOST_MIN_VERSION ||
       ghost_file->version > DSDA_GHOST_VERSION ||
       read_result != 1)
@@ -135,7 +135,7 @@ static void dsda_OpenGhostFile(const char* ghost_name, dsda_ghost_file_t* ghost_
   if (ghost_file->version == 1)
     ghost_file->count = 1;
   else {
-    read_result = fread(&ghost_file->count, sizeof(int), 1, ghost_file->fstream);
+    read_result = (int)fread(&ghost_file->count, sizeof(int), 1, ghost_file->fstream);
     if (read_result != 1)
       I_Error("dsda_OpenGhostImport: error reading ghost count %s", ghost_name);
   }
@@ -315,7 +315,7 @@ void dsda_UpdateGhosts(void* _void) {
 
     // if the ghost was left behind, catch it up
     do {
-      read_result = fread(&ghost->frame, sizeof(dsda_ghost_frame_t), 1, ghost->fstream);
+      read_result = (int)fread(&ghost->frame, sizeof(dsda_ghost_frame_t), 1, ghost->fstream);
 
       if (read_result != 1) {
         fclose(ghost->fstream);

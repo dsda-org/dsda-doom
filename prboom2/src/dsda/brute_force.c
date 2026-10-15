@@ -223,7 +223,7 @@ static void dsda_PrintBFProgress(void) {
   int percent;
   unsigned long long elapsed_time;
 
-  percent = 100 * bf_volume / bf_volume_max;
+  percent = (int)(100 * bf_volume / bf_volume_max);
   elapsed_time = dsda_ElapsedTimeMS(dsda_timer_brute_force);
 
   lprintf(LO_INFO, "  %lld / %lld sequences tested (%d%%) in %.2f seconds!\n",

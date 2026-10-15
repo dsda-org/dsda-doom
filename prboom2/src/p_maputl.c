@@ -739,7 +739,7 @@ dboolean PIT_AddLineIntercepts(line_t *ld)
   intercept_p->frac = frac;
   intercept_p->isaline = true;
   intercept_p->d.line = ld;
-  InterceptsOverrun(intercept_p - intercepts, intercept_p);//e6y
+  InterceptsOverrun((int)(intercept_p - intercepts), intercept_p);//e6y
   intercept_p++;
 
   return true;  // continue
@@ -795,7 +795,7 @@ dboolean PIT_AddThingIntercepts(mobj_t *thing)
   intercept_p->frac = frac;
   intercept_p->isaline = false;
   intercept_p->d.thing = thing;
-  InterceptsOverrun(intercept_p - intercepts, intercept_p);//e6y
+  InterceptsOverrun((int)(intercept_p - intercepts), intercept_p);//e6y
   intercept_p++;
 
   return true;          // keep going
@@ -811,7 +811,7 @@ dboolean PIT_AddThingIntercepts(mobj_t *thing)
 dboolean P_TraverseIntercepts(traverser_t func, fixed_t maxfrac)
 {
   intercept_t *in = NULL;
-  int count = intercept_p - intercepts;
+  int count = (int)(intercept_p - intercepts);
   while (count--)
     {
       fixed_t dist = INT_MAX;

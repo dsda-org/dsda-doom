@@ -327,7 +327,7 @@ void M_CheatGod(void)
     P_MapStart();
     mt.x = plyr->mo->x;
     mt.y = plyr->mo->y;
-    mt.angle = (plyr->mo->angle + ANG45/2)*(uint64_t)45/ANG45;
+    mt.angle = (short)((plyr->mo->angle + ANG45/2)*(uint64_t)45/ANG45);
     mt.type = consoleplayer + 1;
     mt.options = 1; // arbitrary non-zero value
     P_SpawnPlayer(consoleplayer, &mt);
@@ -363,10 +363,7 @@ void M_CheatGod(void)
 static void cheat_god()
 {                                    // 'dqd' cheat for toggleable god mode
   if (demorecording)
-  {
-    dsda_QueueExCmdGod();
-    return;
-  }
+    RETURN(dsda_QueueExCmdGod());
 
   M_CheatGod();
 }
@@ -463,10 +460,7 @@ void M_CheatNoClip(void)
 static void cheat_noclip()
 {
   if (demorecording)
-  {
-    dsda_QueueExCmdNoClip();
-    return;
-  }
+    RETURN(dsda_QueueExCmdNoClip());
 
   M_CheatNoClip();
 }
@@ -555,7 +549,7 @@ static void cheat_rate()
 static void cheat_comp0()
 {
   if (raven)
-    return doom_printf("Cheat disabled for %s", heretic ? "Heretic" : "Hexen");
+    RETURN(doom_printf("Cheat disabled for %s", heretic ? "Heretic" : "Hexen"));
 
   doom_printf("Complevel: %i - %s", compatibility_level, comp_lev_str[compatibility_level]);
 }

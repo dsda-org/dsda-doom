@@ -104,7 +104,7 @@ fixed_t   tmceilingz; // ceiling of sector you're in
 fixed_t   tmdropoffz; // dropoff on other side of line you're crossing
 
 // heretic
-int tmflags;
+uint64_t tmflags;
 
 // hexen
 int tmfloorpic;
@@ -2373,9 +2373,9 @@ dboolean PTR_ShootTraverse (intercept_t* in)
       sector_t *sec = side ? li->backsector : li->frontsector;
 
       real_z = (int64_t) shootz + FixedMul64(aimslope, FixedMul(in->frac, attackrange));
-      z = real_z > INT_MAX ? INT_MAX :
-          real_z < INT_MIN ? INT_MIN :
-          real_z;
+      z = (fixed_t)(real_z > INT_MAX ? INT_MAX :
+                    real_z < INT_MIN ? INT_MIN :
+                    real_z);
 
       if (sec && sec->floorheight > z)
       {
@@ -3519,7 +3519,7 @@ mobj_t *onmobj; // generic global onmobj...used for landing on pods/players
 
 dboolean P_TestMobjLocation(mobj_t * mobj)
 {
-    int flags;
+    uint64_t flags;
 
     flags = mobj->flags;
     mobj->flags &= ~MF_PICKUP;
@@ -3820,7 +3820,7 @@ void P_BounceWall(mobj_t * mo)
     deltaangle >>= ANGLETOFINESHIFT;
 
     movelen = P_AproxDistance(mo->momx, mo->momy);
-    movelen = FixedMul(movelen, 0.75 * FRACUNIT);       // friction
+    movelen = FixedMul(movelen, (fixed_t)(0.75 * FRACUNIT));       // friction
     if (movelen < FRACUNIT)
         movelen = 2 * FRACUNIT;
     mo->momx = FixedMul(movelen, finecosine[deltaangle]);

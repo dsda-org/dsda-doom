@@ -480,7 +480,7 @@ menu_t MainDef =
 
 static void M_DrawMainMenu(void)
 {
-  if (raven) return MN_DrawMainMenu();
+  if (raven) RETURN(MN_DrawMainMenu());
 
   // CPhipps - patch drawing updated
   V_DrawNamePatch(94, 2, 0, "M_DOOM", CR_DEFAULT, VPT_STRETCH);
@@ -644,7 +644,7 @@ static int chosen_episode;
 
 static void M_DrawEpisode(void)
 {
-  if (raven) return MN_DrawEpisode();
+  if (raven) RETURN(MN_DrawEpisode());
 
   // CPhipps - patch drawing updated
   V_DrawNamePatch(54, EpiDef.y - 25, 0, "M_EPISOD", CR_DEFAULT, VPT_STRETCH);
@@ -697,7 +697,7 @@ menu_t SkillDef =
 
 static void M_DrawSkillMenu(void)
 {
-  if (raven) return MN_DrawSkillMenu();
+  if (raven) RETURN(MN_DrawSkillMenu());
 
   // CPhipps - patch drawing updated
   V_DrawNamePatch(96, 14, 0, "M_NEWG", CR_DEFAULT, VPT_STRETCH);
@@ -917,7 +917,7 @@ static void M_DrawLoad(void)
   current_save_page = current_page;
   current_save_item = itemOn;
 
-  if (raven) return MN_DrawLoad();
+  if (raven) RETURN(MN_DrawLoad());
 
   //jff 3/15/98 use symbolic load position
   // CPhipps - patch drawing updated
@@ -1134,7 +1134,7 @@ static int M_AutoSaveSlot(const char *target_name)
   I_EndGlob(glob);
 
   if (return_slot < 0)
-    return_slot = strnlen(slots, SLOT_SCAN_MAX);
+    return_slot = (int)strnlen(slots, SLOT_SCAN_MAX);
 
   if (slots[return_slot] == 1)
     return_slot = -1;
@@ -1163,7 +1163,7 @@ static void M_DrawSave(void)
   current_save_page = current_page;
   current_save_item = itemOn;
 
-  if (raven) return MN_DrawSave();
+  if (raven) RETURN(MN_DrawSave());
 
   //jff 3/15/98 use symbolic load position
   // CPhipps - patch drawing updated
@@ -1236,7 +1236,7 @@ static void M_SaveSelect(int choice)
     snprintf(savegamestrings[choice], SAVESTRINGSIZE, "%s", dsda_MapLumpName(gameepisode, gamemap));
     savegamestrings[choice][SAVESTRINGSIZE - 1] = 0;
   }
-  saveCharIndex = strlen(savegamestrings[choice]);
+  saveCharIndex = (int)strlen(savegamestrings[choice]);
 }
 
 //
@@ -1316,7 +1316,7 @@ menu_t OptionsDef =
 
 static void M_DrawOptions(void)
 {
-  if (raven) return MN_DrawOptions();
+  if (raven) RETURN(MN_DrawOptions());
 
   // CPhipps - patch drawing updated
   // proff/nicolas 09/20/98 -- changed for hi-res
@@ -1451,7 +1451,7 @@ static void M_DrawSound(void)
 {
   char num[4];
 
-  if (raven) return MN_DrawSound();
+  if (raven) RETURN(MN_DrawSound());
 
   // CPhipps - patch drawing updated
   V_DrawNamePatch(60, 38, 0, "M_SVOL", CR_DEFAULT, VPT_STRETCH);
@@ -1952,7 +1952,7 @@ static void M_AppendText(char *dest, size_t dest_size, const char *src)
 
 static void M_TruncateTextToWidth(char *text, size_t text_size, int max_width)
 {
-  int len = strlen(text);
+  int len = (int)strlen(text);
 
   if (len == 0 || M_GetPixelWidth(text) <= max_width)
     return;
@@ -1968,7 +1968,7 @@ static void M_TrimSetupString(char *text, dboolean update_entry_index)
 {
   while (text[0] && M_GetPixelWidth(text) >= MAXENTRYWIDTH)
   {
-    int len = strlen(text);
+    int len = (int)strlen(text);
 
     text[--len] = 0;
     if (update_entry_index && entry_index > len)
@@ -2417,9 +2417,9 @@ static void M_DrawSetupMenuScrollbar(int base_y,
     scrollbar_scale = (185 - DEFAULT_LIST_Y) / (float)layout->max_i;
 
     xx = 310;
-    yy = base_y + layout->scroll_i * scrollbar_scale;
+    yy = (int)(base_y + layout->scroll_i * scrollbar_scale);
     ww = 2;
-    hh = layout->limit_i * scrollbar_scale;
+    hh = (int)(layout->limit_i * scrollbar_scale);
     V_GetWideRect(&xx, &yy, &ww, &hh, VPT_STRETCH);
     V_FillRect(0, xx, yy, ww, hh, colrngs[cr_scrollbar][playpal_lightest]);
   }
@@ -4637,7 +4637,7 @@ static int M_GetKeyString(int c,int offset)
 
       if (s) { // cph - Slight code change
   strcpy(&menu_buffer[offset],s); // string to display
-  offset += strlen(s);
+  offset += (int)strlen(s);
       }
     }
   }
@@ -4803,7 +4803,7 @@ static inline int GetButtons(const unsigned int max, int data)
 {
   int i;
 
-  for (i = 0; i < max; ++i)
+  for (i = 0; i < (int)max; ++i)
   {
     if (data & (1 << i))
     {
@@ -6398,7 +6398,7 @@ static void M_InitializeEpisodeMenu(void)
 {
   int i;
 
-  EpiDef.numitems = num_episodes;
+  EpiDef.numitems = (short)num_episodes;
   EpiDef.menuitems = Z_Calloc(num_episodes, sizeof(*EpiDef.menuitems));
 
   for (i = 0; i < num_episodes; ++i)
@@ -6670,7 +6670,7 @@ void M_Ticker (void)
     skullAnimCounter = 8;
   }
 
-  if (raven) return MN_Ticker();
+  if (raven) RETURN(MN_Ticker());
 }
 
 /////////////////////////////
@@ -6714,7 +6714,7 @@ static void M_DrawThermo(int x, int y, int thermWidth, int thermRange, int therm
   int dot_offset;
   int flags;
 
-  if (raven) return MN_DrawSlider(x, y, thermWidth, thermRange, thermDot, color);
+  if (raven) RETURN(MN_DrawSlider(x, y, thermWidth, thermRange, thermDot, color));
 
   // [AR] We check both if the item is selected and highlight
   // to include the label on the sound screen
@@ -6855,7 +6855,7 @@ static void M_WriteText (int x,int y, const char* string, int cm)
 
 static void M_DrawTitle(int y, const char *text, int cm)
 {
-  if (raven) return MN_DrawTitle(y, text, cm);
+  if (raven) RETURN(MN_DrawTitle(y, text, cm));
 
   M_WriteText(160 - (M_StringWidth(text) / 2),
               y + 8 - (M_StringHeight(text) / 2), // assumes patch height 16

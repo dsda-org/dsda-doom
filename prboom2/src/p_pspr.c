@@ -1137,7 +1137,7 @@ void A_FireCGun(player_t *player, pspdef_t *psp)
   P_SetMobjState(player->mo, S_PLAY_ATK2);
   P_SubtractAmmo(player, 1);
 
-  A_FireSomething(player,psp->state - &states[S_CHAIN1]);           // phares
+  A_FireSomething(player,(int)(psp->state - &states[S_CHAIN1]));           // phares
 
   P_BulletSlope(player->mo);
 
@@ -1235,11 +1235,11 @@ void A_WeaponProjectile(player_t *player, pspdef_t *psp)
   if (!mbf21 || !psp->state || !psp->state->args[0])
     return;
 
-  type        = psp->state->args[0] - 1;
-  angle       = psp->state->args[1];
-  pitch       = psp->state->args[2];
-  spawnofs_xy = psp->state->args[3];
-  spawnofs_z  = psp->state->args[4];
+  type        = (int)psp->state->args[0] - 1;
+  angle       = (int)psp->state->args[1];
+  pitch       = (int)psp->state->args[2];
+  spawnofs_xy = (int)psp->state->args[3];
+  spawnofs_z  = (int)psp->state->args[4];
 
   mo = P_SpawnPlayerMissile(player->mo, type);
   if (!mo)
@@ -1287,11 +1287,11 @@ void A_WeaponBulletAttack(player_t *player, pspdef_t *psp)
   if (!mbf21 || !psp->state)
     return;
 
-  hspread    = psp->state->args[0];
-  vspread    = psp->state->args[1];
-  numbullets = psp->state->args[2];
-  damagebase = psp->state->args[3];
-  damagemod  = psp->state->args[4];
+  hspread    = (int)psp->state->args[0];
+  vspread    = (int)psp->state->args[1];
+  numbullets = (int)psp->state->args[2];
+  damagebase = (int)psp->state->args[3];
+  damagemod  = (int)psp->state->args[4];
 
   P_BulletSlope(player->mo);
 
@@ -1325,11 +1325,11 @@ void A_WeaponMeleeAttack(player_t *player, pspdef_t *psp)
   if (!mbf21 || !psp->state)
     return;
 
-  damagebase = psp->state->args[0];
-  damagemod  = psp->state->args[1];
-  zerkfactor = psp->state->args[2];
-  hitsound   = psp->state->args[3];
-  range      = psp->state->args[4];
+  damagebase = (int)psp->state->args[0];
+  damagemod  = (int)psp->state->args[1];
+  zerkfactor = (int)psp->state->args[2];
+  hitsound   = (int)psp->state->args[3];
+  range      = (int)psp->state->args[4];
 
   if (range == 0)
     range = player->mo->info->meleerange;
@@ -1377,7 +1377,7 @@ void A_WeaponSound(player_t *player, pspdef_t *psp)
   if (!mbf21 || !psp->state)
     return;
 
-  S_StartMobjSound(psp->state->args[1] ? NULL : player->mo, psp->state->args[0]);
+  S_StartMobjSound(psp->state->args[1] ? NULL : player->mo, (int)psp->state->args[0]);
 }
 
 //
@@ -1435,7 +1435,7 @@ void A_ConsumeAmmo(player_t *player, pspdef_t *psp)
   // use the weapon's ammo-per-shot amount if zero.
   // to subtract zero ammo, don't call this function. ;)
   if (psp->state->args[0] != 0)
-    amount = psp->state->args[0];
+    amount = (int)psp->state->args[0];
   else
     amount = weaponinfo[player->readyweapon].ammopershot;
 
@@ -1467,7 +1467,7 @@ void A_CheckAmmo(player_t *player, pspdef_t *psp)
     return;
 
   if (psp->state->args[1] != 0)
-    amount = psp->state->args[1];
+    amount = (int)psp->state->args[1];
   else
     amount = weaponinfo[player->readyweapon].ammopershot;
 
@@ -3075,7 +3075,7 @@ void A_MStaffPalette(player_t * player, pspdef_t * psp)
 
     if (player == &players[consoleplayer])
     {
-        pal = STARTSCOURGEPAL + psp->state - (&states[HEXEN_S_MSTAFFATK_2]);
+        pal = STARTSCOURGEPAL + (int)(psp->state - (&states[HEXEN_S_MSTAFFATK_2]));
         if (pal == STARTSCOURGEPAL + 3)
         {                       // reset back to original playpal
             pal = 0;
@@ -3225,9 +3225,11 @@ void A_FAxeAttack(player_t * player, pspdef_t * psp)
     int i;
     int useMana;
     int r;
+    fixed_t axe_range;
 
     r = P_Random(pr_hexen);
     damage = 40 + (r & 15) + (P_Random(pr_hexen) & 7);
+    axe_range = (fixed_t)(AXERANGE);
     power = 0;
     if (player->ammo[MANA_1] > 0)
     {
@@ -3244,10 +3246,10 @@ void A_FAxeAttack(player_t * player, pspdef_t * psp)
     for (i = 0; i < 16; i++)
     {
         angle = pmo->angle + i * (ANG45 / 16);
-        slope = P_AimLineAttack(pmo, angle, AXERANGE, 0);
+        slope = P_AimLineAttack(pmo, angle, axe_range, 0);
         if (linetarget)
         {
-            P_LineAttack(pmo, angle, AXERANGE, slope, damage);
+            P_LineAttack(pmo, angle, axe_range, slope, damage);
             if (linetarget->flags & MF_COUNTKILL || linetarget->player)
             {
                 P_ThrustMobj(linetarget, angle, power);
@@ -3257,10 +3259,10 @@ void A_FAxeAttack(player_t * player, pspdef_t * psp)
             goto axedone;
         }
         angle = pmo->angle - i * (ANG45 / 16);
-        slope = P_AimLineAttack(pmo, angle, AXERANGE, 0);
+        slope = P_AimLineAttack(pmo, angle, axe_range, 0);
         if (linetarget)
         {
-            P_LineAttack(pmo, angle, AXERANGE, slope, damage);
+            P_LineAttack(pmo, angle, axe_range, slope, damage);
             if (linetarget->flags & MF_COUNTKILL)
             {
                 P_ThrustMobj(linetarget, angle, power);
@@ -3338,17 +3340,19 @@ void A_CStaffCheck(player_t * player, pspdef_t * psp)
     angle_t angle;
     int slope;
     int i;
+    fixed_t melee_range;
 
     pmo = player->mo;
     damage = 20 + (P_Random(pr_hexen) & 15);
+    melee_range = (fixed_t)(1.5 * MELEERANGE);
     PuffType = HEXEN_MT_CSTAFFPUFF;
     for (i = 0; i < 3; i++)
     {
         angle = pmo->angle + i * (ANG45 / 16);
-        slope = P_AimLineAttack(pmo, angle, 1.5 * MELEERANGE, 0);
+        slope = P_AimLineAttack(pmo, angle, melee_range, 0);
         if (linetarget)
         {
-            P_LineAttack(pmo, angle, 1.5 * MELEERANGE, slope, damage);
+            P_LineAttack(pmo, angle, melee_range, slope, damage);
             pmo->angle = R_PointToAngle2(pmo->x, pmo->y,
                                          linetarget->x, linetarget->y);
             if ((linetarget->player || linetarget->flags & MF_COUNTKILL)
@@ -3364,10 +3368,10 @@ void A_CStaffCheck(player_t * player, pspdef_t * psp)
             break;
         }
         angle = pmo->angle - i * (ANG45 / 16);
-        slope = P_AimLineAttack(player->mo, angle, 1.5 * MELEERANGE, 0);
+        slope = P_AimLineAttack(player->mo, angle, melee_range, 0);
         if (linetarget)
         {
-            P_LineAttack(pmo, angle, 1.5 * MELEERANGE, slope, damage);
+            P_LineAttack(pmo, angle, melee_range, slope, damage);
             pmo->angle = R_PointToAngle2(pmo->x, pmo->y,
                                          linetarget->x, linetarget->y);
             if (linetarget->player || linetarget->flags & MF_COUNTKILL)
@@ -3485,9 +3489,8 @@ void A_CFlameMissile(mobj_t * actor)
             {
                 mo->angle = an << ANGLETOFINESHIFT;
                 P_SetTarget(&mo->target, actor->target);
-                mo->momx = mo->special1.i =
-                    FixedMul(FLAMESPEED, finecosine[an]);
-                mo->momy = mo->special2.i = FixedMul(FLAMESPEED, finesine[an]);
+                mo->momx = mo->special1.i = FixedMul((fixed_t)FLAMESPEED, finecosine[an]);
+                mo->momy = mo->special2.i = FixedMul((fixed_t)FLAMESPEED, finesine[an]);
                 mo->tics -= P_Random(pr_hexen) & 3;
             }
             mo = P_SpawnMobj(BlockingMobj->x - FixedMul(dist, finecosine[an]),
@@ -3497,9 +3500,8 @@ void A_CFlameMissile(mobj_t * actor)
             {
                 mo->angle = ANG180 + (an << ANGLETOFINESHIFT);
                 P_SetTarget(&mo->target, actor->target);
-                mo->momx = mo->special1.i = FixedMul(-FLAMESPEED,
-                                                     finecosine[an]);
-                mo->momy = mo->special2.i = FixedMul(-FLAMESPEED, finesine[an]);
+                mo->momx = mo->special1.i = FixedMul((fixed_t)-FLAMESPEED, finecosine[an]);
+                mo->momy = mo->special2.i = FixedMul((fixed_t)-FLAMESPEED, finesine[an]);
                 mo->tics -= P_Random(pr_hexen) & 3;
             }
         }
@@ -3607,7 +3609,7 @@ void A_CHolyPalette(player_t * player, pspdef_t * psp)
 
     if (player == &players[consoleplayer])
     {
-        pal = STARTHOLYPAL + psp->state - (&states[HEXEN_S_CHOLYATK_6]);
+        pal = STARTHOLYPAL + (int)(psp->state - (&states[HEXEN_S_CHOLYATK_6]));
         if (pal == STARTHOLYPAL + 3)
         {                       // reset back to original playpal
             pal = 0;

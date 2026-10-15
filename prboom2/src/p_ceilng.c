@@ -952,7 +952,7 @@ int EV_DoZDoomCeiling(ceiling_e type, line_t *line, int tag, fixed_t speed, fixe
     if (!line || !(sec = line->backsector))
       return 0;
 
-    secnum = sec - sectors;
+    secnum = (int)(sec - sectors);
     // [RH] Hack to let manual crushers be retriggerable, too
     tag ^= secnum | 0x1000000;
     P_ActivateInStasisCeiling(tag);
