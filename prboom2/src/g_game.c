@@ -835,6 +835,10 @@ void G_BuildTiccmd(ticcmd_t* cmd)
     }
   }
 
+  // Track freelook status
+  if (dsda_ExCmdDemo())
+    dsda_QueueExCmdFreeLook(dsda_IntConfig(dsda_config_freelook));
+
   if (dsda_InputActive(dsda_input_fire))
     cmd->buttons |= BT_ATTACK;
 
@@ -1637,9 +1641,14 @@ void G_Ticker (void)
             M_CheatNoClip();
           }
 
-          if (ex->actions & XC_LOOK && ex->look != XC_LOOK_RESET && !dsda_FreeAim())
+          if (ex->actions & XC_FREELOOK_ON)
           {
             dsda_UpdateIntConfig(dsda_config_freelook, 1, false);
+          }
+
+          if (ex->actions & XC_FREELOOK_OFF)
+          {
+            dsda_UpdateIntConfig(dsda_config_freelook, 0, false);
           }
         }
       }

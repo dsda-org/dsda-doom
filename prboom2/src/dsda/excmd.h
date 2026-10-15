@@ -20,12 +20,14 @@
 
 #include "d_ticcmd.h"
 
-#define XC_JUMP   0x01
-#define XC_SAVE   0x02
-#define XC_LOAD   0x04
-#define XC_GOD    0x08
-#define XC_NOCLIP 0x10
-#define XC_LOOK   0x20
+#define XC_JUMP         0x01
+#define XC_SAVE         0x02
+#define XC_LOAD         0x04
+#define XC_GOD          0x08
+#define XC_NOCLIP       0x10
+#define XC_LOOK         0x20
+#define XC_FREELOOK_ON  0x40
+#define XC_FREELOOK_OFF 0x80
 
 #define XC_LOOK_RESET -32768
 
@@ -43,6 +45,7 @@ void dsda_ResetExCmdQueue(void);
 void dsda_PopExCmdQueue(ticcmd_t* cmd);
 void dsda_QueueExCmdJump(void);
 void dsda_QueueExCmdLook(short look);
+void dsda_QueueExCmdFreeLook(int freelook);
 void dsda_QueueExCmdSave(int slot);
 void dsda_QueueExCmdLoad(int slot);
 void dsda_QueueExCmdGod(void);
