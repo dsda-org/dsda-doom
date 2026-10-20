@@ -132,6 +132,10 @@ void dsda_QueueExCmdLook(short look) {
   excmd_queue.look = look;
 }
 
+void dsda_QueueExCmdFreeLook(void) {
+  excmd_queue.actions |= XC_FREELOOK;
+}
+
 void dsda_QueueExCmdSave(int slot) {
   excmd_queue.actions |= XC_SAVE;
   excmd_queue.save_slot = slot;
