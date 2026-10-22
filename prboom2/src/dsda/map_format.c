@@ -321,15 +321,6 @@ void T_CompatiblePlatRaise(plat_t * plat);
 void T_HexenPlatRaise(plat_t * plat);
 void T_ZDoomPlatRaise(plat_t * plat);
 
-void P_CreateTIDList(void);
-void dsda_BuildMobjThingIDList(void);
-
-void P_InsertMobjIntoTIDList(mobj_t * mobj, short tid);
-void dsda_AddMobjThingID(mobj_t* mo, short thing_id);
-
-void P_RemoveMobjFromTIDList(mobj_t * mobj);
-void dsda_RemoveMobjThingID(mobj_t* mo);
-
 void P_IterateCompatibleSpecHit(mobj_t *thing, fixed_t oldx, fixed_t oldy);
 void P_IterateZDoomSpecHit(mobj_t *thing, fixed_t oldx, fixed_t oldy);
 
@@ -369,9 +360,6 @@ static const map_format_t zdoom_map_format = {
   .t_plat_raise = T_ZDoomPlatRaise,
   .ev_teleport = EV_CompatibleTeleport,
   .player_thrust = P_CompatiblePlayerThrust,
-  .build_mobj_thing_id_list = dsda_BuildMobjThingIDList,
-  .add_mobj_thing_id = dsda_AddMobjThingID,
-  .remove_mobj_thing_id = dsda_RemoveMobjThingID,
   .iterate_spechit = P_IterateZDoomSpecHit,
   .mapthing_size = sizeof(hexen_mapthing_t),
   .maplinedef_size = sizeof(hexen_maplinedef_t),
@@ -420,9 +408,6 @@ static const map_format_t hexen_map_format = {
   .t_plat_raise = T_HexenPlatRaise,
   .ev_teleport = NULL, // not used
   .player_thrust = P_HexenPlayerThrust,
-  .build_mobj_thing_id_list = P_CreateTIDList,
-  .add_mobj_thing_id = P_InsertMobjIntoTIDList,
-  .remove_mobj_thing_id = P_RemoveMobjFromTIDList,
   .iterate_spechit = NULL, // not used
   .mapthing_size = sizeof(hexen_mapthing_t),
   .maplinedef_size = sizeof(hexen_maplinedef_t),
@@ -471,9 +456,6 @@ static const map_format_t heretic_map_format = {
   .t_plat_raise = T_CompatiblePlatRaise,
   .ev_teleport = EV_HereticTeleport,
   .player_thrust = P_HereticPlayerThrust,
-  .build_mobj_thing_id_list = NULL, // not used
-  .add_mobj_thing_id = NULL, // not used
-  .remove_mobj_thing_id = NULL, // not used
   .iterate_spechit = P_IterateCompatibleSpecHit,
   .mapthing_size = sizeof(doom_mapthing_t),
   .maplinedef_size = sizeof(doom_maplinedef_t),
@@ -522,9 +504,6 @@ static const map_format_t doom_map_format = {
   .t_plat_raise = T_CompatiblePlatRaise,
   .ev_teleport = EV_CompatibleTeleport,
   .player_thrust = P_CompatiblePlayerThrust,
-  .build_mobj_thing_id_list = NULL, // not used
-  .add_mobj_thing_id = NULL, // not used
-  .remove_mobj_thing_id = NULL, // not used
   .iterate_spechit = P_IterateCompatibleSpecHit,
   .mapthing_size = sizeof(doom_mapthing_t),
   .maplinedef_size = sizeof(doom_maplinedef_t),

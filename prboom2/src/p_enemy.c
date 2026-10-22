@@ -35,6 +35,7 @@
 
 #include "doomstat.h"
 #include "m_random.h"
+#include "p_mobj.h"
 #include "r_main.h"
 #include "p_maputl.h"
 #include "p_map.h"
@@ -5375,7 +5376,7 @@ dboolean P_UpdateMorphedMonster(mobj_t * actor, int tics)
     z = actor->z;
     oldMonster = *actor;        // Save pig vars
 
-    map_format.remove_mobj_thing_id(actor);
+    P_RemoveThingTID(actor);
     P_SetMobjState(actor, HEXEN_S_FREETARGMOBJ);
     mo = P_SpawnMobj(x, y, z, moType);
     dsda_WatchUnMorph(mo);
@@ -5392,7 +5393,7 @@ dboolean P_UpdateMorphedMonster(mobj_t * actor, int tics)
         mo->special2.i = moType;
         mo->tid = oldMonster.tid;
         memcpy(mo->special_args, oldMonster.special_args, SPECIAL_ARGS_SIZE);
-        map_format.add_mobj_thing_id(mo, oldMonster.tid);
+        P_AddThingTID(mo, oldMonster.tid);
         dsda_WatchMorph(mo);
         return (false);
     }
@@ -5401,7 +5402,7 @@ dboolean P_UpdateMorphedMonster(mobj_t * actor, int tics)
     mo->tid = oldMonster.tid;
     mo->special = oldMonster.special;
     memcpy(mo->special_args, oldMonster.special_args, SPECIAL_ARGS_SIZE);
-    map_format.add_mobj_thing_id(mo, oldMonster.tid);
+    P_AddThingTID(mo, oldMonster.tid);
     fog = P_SpawnMobj(x, y, z + TELEFOGHEIGHT, HEXEN_MT_TFOG);
     S_StartMobjSound(fog, hexen_sfx_teleport);
     return (true);
@@ -6422,12 +6423,11 @@ static void DragonSeek(mobj_t * actor, angle_t thresh, angle_t turnMax)
     angle_t delta;
     angle_t angle;
     mobj_t *target;
-    int search;
     int i;
     int bestArg;
     angle_t bestAngle;
     angle_t angleToSpot, angleToTarget;
-    mobj_t *mo;
+    mobj_t *mo = NULL;
 
     target = actor->special1.m;
     if (target == NULL)
@@ -6509,8 +6509,7 @@ static void DragonSeek(mobj_t * actor, angle_t thresh, angle_t turnMax)
                 {
                     continue;
                 }
-                search = -1;
-                mo = P_FindMobjFromTID(target->special_args[i], &search);
+                mo = P_FindMobjFromTID(target->special_args[i], mo, NULL);
                 // [crispy] fix wyvern + porkalator bug
                 if (mo == NULL)
                 {
@@ -6533,10 +6532,9 @@ static void DragonSeek(mobj_t * actor, angle_t thresh, angle_t turnMax)
             }
             if (bestArg != -1)
             {
-                search = -1;
                 P_SetTarget(
                   &actor->special1.m,
-                  P_FindMobjFromTID(target->special_args[bestArg], &search)
+                  P_FindMobjFromTID(target->special_args[bestArg], NULL, NULL)
                 );
             }
         }
@@ -6547,10 +6545,9 @@ static void DragonSeek(mobj_t * actor, angle_t thresh, angle_t turnMax)
                 i = (P_Random(pr_hexen) >> 2) % 5;
             }
             while (!target->special_args[i]);
-            search = -1;
             P_SetTarget(
               &actor->special1.m,
-              P_FindMobjFromTID(target->special_args[i], &search)
+              P_FindMobjFromTID(target->special_args[i], NULL, NULL)
             );
         }
     }
@@ -6565,7 +6562,7 @@ void A_DragonInitFlight(mobj_t * actor)
     {                           // find the first tid identical to the dragon's tid
         P_SetTarget(
           &actor->special1.m,
-          P_FindMobjFromTID(actor->tid, &search)
+          P_FindMobjFromTID(actor->tid, NULL, NULL)
         );
         if (search == -1)
         {
@@ -6574,7 +6571,7 @@ void A_DragonInitFlight(mobj_t * actor)
         }
     }
     while (actor->special1.m == actor);
-    map_format.remove_mobj_thing_id(actor);
+    P_RemoveThingTID(actor);
 }
 
 void A_DragonFlight(mobj_t * actor)
@@ -7367,7 +7364,7 @@ void A_FreezeDeathChunks(mobj_t * actor)
         mo->player->mo = mo;
         mo->player->lookdir = 0;
     }
-    map_format.remove_mobj_thing_id(actor);
+    P_RemoveThingTID(actor);
     P_SetMobjState(actor, HEXEN_S_FREETARGMOBJ);
     actor->flags2 |= MF2_DONTDRAW;
 }
@@ -8292,15 +8289,16 @@ void KSpiritInit(mobj_t * spirit, mobj_t * korax);
 
 void A_KoraxChase(mobj_t * actor)
 {
-    mobj_t *spot;
-    int lastfound;
+    // TODO PLAYSIM BREAKING:
+    // lastfound needs to be updated to keep track of last found spot, bad, bad, bad.
+    mobj_t *lastfound = NULL;
+    mobj_t *spot = NULL;
     byte args[3] = {0, 0, 0};
 
     if ((!actor->special2.i) &&
         (actor->health <= (P_MobjSpawnHealth(actor) / 2)))
     {
-        lastfound = 0;
-        spot = P_FindMobjFromTID(KORAX_FIRST_TELEPORT_TID, &lastfound);
+        spot = P_FindMobjFromTID(KORAX_FIRST_TELEPORT_TID, lastfound, NULL);
         if (spot)
         {
             P_Teleport(actor, spot->x, spot->y, spot->angle, true);
@@ -8329,9 +8327,9 @@ void A_KoraxChase(mobj_t * actor)
     {
         if (P_Random(pr_hexen) < 10)
         {
-            lastfound = actor->special1.i;
-            spot = P_FindMobjFromTID(KORAX_TELEPORT_TID, &lastfound);
-            actor->special1.i = lastfound;
+            lastfound = actor->special1.m;
+            spot = P_FindMobjFromTID(KORAX_TELEPORT_TID, lastfound, NULL);
+            actor->special1.m = lastfound;
             if (spot)
             {
                 P_Teleport(actor, spot->x, spot->y, spot->angle, true);

@@ -35,6 +35,7 @@
 #include "dstrings.h"
 #include "m_random.h"
 #include "am_map.h"
+#include "p_mobj.h"
 #include "r_main.h"
 #include "s_sound.h"
 #include "smooth.h"
@@ -3623,7 +3624,7 @@ static dboolean P_MorphMonster(mobj_t * actor)
     x = oldMonster.x;
     y = oldMonster.y;
     z = oldMonster.z;
-    map_format.remove_mobj_thing_id(actor);
+    P_RemoveThingTID(actor);
     P_SetMobjState(actor, HEXEN_S_FREETARGMOBJ);
     fog = P_SpawnMobj(x, y, z + TELEFOGHEIGHT, HEXEN_MT_TFOG);
     S_StartMobjSound(fog, hexen_sfx_teleport);
@@ -3635,7 +3636,7 @@ static dboolean P_MorphMonster(mobj_t * actor)
     monster->angle = oldMonster.angle;
     monster->tid = oldMonster.tid;
     monster->special = oldMonster.special;
-    map_format.add_mobj_thing_id(monster, oldMonster.tid);
+    P_AddThingTID(monster, oldMonster.tid);
     memcpy(monster->special_args, oldMonster.special_args, SPECIAL_ARGS_SIZE);
     dsda_WatchMorph(monster);
 

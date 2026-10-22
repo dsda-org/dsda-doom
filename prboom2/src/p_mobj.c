@@ -31,6 +31,7 @@
  *
  *-----------------------------------------------------------------------------*/
 
+#include "p_mobj.h"
 #include "doomdef.h"
 #include "doomstat.h"
 #include "m_random.h"
@@ -61,7 +62,6 @@
 #include "dsda/settings.h"
 #include "dsda/skill_info.h"
 #include "dsda/spawn_number.h"
-#include "dsda/thing_id.h"
 #include "dsda/tranmap.h"
 #include "dsda/utility.h"
 
@@ -1546,10 +1546,8 @@ dboolean P_SpawnProjectile(short thing_id, mobj_t *source, int spawn_num, angle_
   int type;
   dboolean is_monster;
   dboolean success = false;
-  thing_id_search_t search;
-  thing_id_search_t dest_search;
-  mobj_t *spawn_location;
-  mobj_t *destination;
+  mobj_t *spawn_location = NULL;
+  mobj_t *destination = NULL;
   mobj_t *new_mobj;
 
   type = dsda_ThingTypeFromSpawnNumber(spawn_num);
@@ -1562,11 +1560,9 @@ dboolean P_SpawnProjectile(short thing_id, mobj_t *source, int spawn_num, angle_
   if (nomonsters && is_monster)
     return false;
 
-  dsda_ResetThingIDSearch(&search);
-  while ((spawn_location = dsda_FindMobjFromThingIDOrMobj(thing_id, source, &search)))
+  while ((spawn_location = P_FindMobjFromTID(thing_id, spawn_location, source)))
   {
-    dsda_ResetThingIDSearch(&dest_search);
-    destination = dsda_FindMobjFromThingIDOrMobj(dest_id, forcedest, &dest_search);
+    destination = P_FindMobjFromTID(dest_id, destination, forcedest);
 
     if (!dest_id || destination)
     {
@@ -1576,7 +1572,7 @@ dboolean P_SpawnProjectile(short thing_id, mobj_t *source, int spawn_num, angle_
         if (new_mobj)
         {
           if (new_thing_id)
-            dsda_AddMobjThingID(new_mobj, new_thing_id);
+            P_AddThingTID(new_mobj, new_thing_id);
 
           if (new_mobj->info->seesound)
           {
@@ -1639,7 +1635,7 @@ dboolean P_SpawnProjectile(short thing_id, mobj_t *source, int spawn_num, angle_
             P_RemoveMobj(new_mobj);
           }
         }
-      } while (dest_id && (destination = dsda_FindMobjFromThingIDOrMobj(dest_id, forcedest, &dest_search)));
+      } while (dest_id && (destination = P_FindMobjFromTID(dest_id, destination, forcedest)));
     }
   }
 
@@ -1651,8 +1647,7 @@ dboolean P_SpawnThing(short thing_id, mobj_t *source, int spawn_num,
 {
   int type;
   dboolean success = false;
-  thing_id_search_t search;
-  mobj_t *spawn_location;
+  mobj_t *spawn_location = NULL;
   mobj_t *new_mobj;
 
   type = dsda_ThingTypeFromSpawnNumber(spawn_num);
@@ -1663,8 +1658,7 @@ dboolean P_SpawnThing(short thing_id, mobj_t *source, int spawn_num,
   if (nomonsters && (type == MT_SKULL || (mobjinfo[type].flags & MF_COUNTKILL)))
     return false;
 
-  dsda_ResetThingIDSearch(&search);
-  while ((spawn_location = dsda_FindMobjFromThingIDOrMobj(thing_id, source, &search)))
+  while ((spawn_location = P_FindMobjFromTID(thing_id, spawn_location, source)))
   {
     new_mobj = P_SpawnMobj(spawn_location->x, spawn_location->y, spawn_location->z, type);
     if (!P_TestMobjLocation(new_mobj))
@@ -1683,7 +1677,7 @@ dboolean P_SpawnThing(short thing_id, mobj_t *source, int spawn_num,
         S_StartMobjSound(fog_mobj, g_sfx_telept);
       }
       if (new_thing_id)
-        dsda_AddMobjThingID(new_mobj, new_thing_id);
+        P_AddThingTID(new_mobj, new_thing_id);
       new_mobj->flags |= MF_DROPPED; // Don't respawn
       success = true;
     }
@@ -1890,7 +1884,7 @@ void P_RemoveMobj (mobj_t* mobj)
 
     if (map_format.thing_id && mobj->tid)
     {
-      map_format.remove_mobj_thing_id(mobj);
+      P_RemoveThingTID(mobj);
     }
 
     P_UnsetThingPosition(mobj);
@@ -1921,7 +1915,7 @@ void P_RemoveMobj (mobj_t* mobj)
 
   if (map_format.thing_id && mobj->tid)
   {
-    map_format.remove_mobj_thing_id(mobj);
+    P_RemoveThingTID(mobj);
   }
 
   // unlink from sector and block lists
@@ -3568,12 +3562,7 @@ void P_RipperBlood(mobj_t * mo, mobj_t * bleeder)
 
 // hexen
 
-#define MAX_TID_COUNT 200
-
 extern mobj_t LavaInflictor;
-
-static int TIDList[MAX_TID_COUNT + 1];  // +1 for termination marker
-static mobj_t *TIDMobj[MAX_TID_COUNT];
 
 mobj_t *P_SpawnMissileAngleSpeed(mobj_t * source, mobjtype_t type,
                                  angle_t angle, fixed_t momz, fixed_t speed)
@@ -3646,97 +3635,6 @@ static void PlayerLandedOnThing(mobj_t * mo, mobj_t * onmobj, fixed_t gravity)
         S_StartMobjSound(mo, hexen_sfx_player_land);
     }
     P_AutoCorrectLookDir(mo->player);
-}
-
-void P_CreateTIDList(void)
-{
-    int i;
-    mobj_t *mobj;
-    thinker_t *t;
-
-    i = 0;
-    for (t = thinkercap.next; t != &thinkercap; t = t->next)
-    {                           // Search all current thinkers
-        if (t->function != P_MobjThinker)
-        {                       // Not a mobj thinker
-            continue;
-        }
-        mobj = (mobj_t *) t;
-        if (mobj->tid != 0)
-        {                       // Add to list
-            if (i == MAX_TID_COUNT)
-            {
-                I_Error("P_CreateTIDList: MAX_TID_COUNT (%d) exceeded.",
-                        MAX_TID_COUNT);
-            }
-            TIDList[i] = mobj->tid;
-            TIDMobj[i++] = mobj;
-        }
-    }
-    // Add termination marker
-    TIDList[i] = 0;
-}
-
-void P_InsertMobjIntoTIDList(mobj_t * mobj, short tid)
-{
-    int i;
-    int index;
-
-    index = -1;
-    for (i = 0; TIDList[i] != 0; i++)
-    {
-        if (TIDList[i] == -1)
-        {                       // Found empty slot
-            index = i;
-            break;
-        }
-    }
-    if (index == -1)
-    {                           // Append required
-        if (i == MAX_TID_COUNT)
-        {
-            I_Error("P_InsertMobjIntoTIDList: MAX_TID_COUNT (%d)"
-                    "exceeded.", MAX_TID_COUNT);
-        }
-        index = i;
-        TIDList[index + 1] = 0;
-    }
-    mobj->tid = tid;
-    TIDList[index] = tid;
-    TIDMobj[index] = mobj;
-}
-
-void P_RemoveMobjFromTIDList(mobj_t * mobj)
-{
-    int i;
-
-    for (i = 0; TIDList[i] != 0; i++)
-    {
-        if (TIDMobj[i] == mobj)
-        {
-            TIDList[i] = -1;
-            TIDMobj[i] = NULL;
-            mobj->tid = 0;
-            return;
-        }
-    }
-    mobj->tid = 0;
-}
-
-mobj_t *P_FindMobjFromTID(short tid, int *searchPosition)
-{
-    int i;
-
-    for (i = *searchPosition + 1; TIDList[i] != 0; i++)
-    {
-        if (TIDList[i] == tid)
-        {
-            *searchPosition = i;
-            return TIDMobj[i];
-        }
-    }
-    *searchPosition = -1;
-    return NULL;
 }
 
 void P_BloodSplatter2(fixed_t x, fixed_t y, fixed_t z, mobj_t * originator)
@@ -3914,4 +3812,151 @@ mobj_t *P_SpawnKoraxMissile(fixed_t x, fixed_t y, fixed_t z,
     }
     th->momz = (dest->z - z + (30 * FRACUNIT)) / dist;
     return (P_CheckMissileSpawn(th) ? th : NULL);
+}
+
+//
+// haleyjd 02/02/04: Thing IDs (aka TIDs)
+//
+
+#define TIDCHAINS 131
+
+// TID hash chains
+static mobj_t *tidhash[TIDCHAINS];
+
+//
+// P_InitTIDHash
+//
+// Initializes the tid hash table.
+//
+void P_InitTIDHash(void)
+{
+    memset(tidhash, 0, TIDCHAINS * sizeof(mobj_t *));
+}
+
+//
+// P_AddThingTID
+//
+// Adds a thing to the tid hash table
+//
+void P_AddThingTID(mobj_t *mo, int tid)
+{
+    // zero is no tid, and negative tids are reserved to
+    // have special meanings
+    if (tid <= 0)
+    {
+        mo->tid = 0;
+        mo->tid_next = NULL;
+        mo->tid_prevn = NULL;
+    }
+    else
+    {
+        int key = tid % TIDCHAINS;
+
+        mo->tid = (short)tid;
+
+        // insert at head of chain
+        mo->tid_next = tidhash[key];
+        mo->tid_prevn = &tidhash[key];
+        tidhash[key] = mo;
+
+        // connect to any existing things in chain
+        if (mo->tid_next)
+        {
+            mo->tid_next->tid_prevn = &(mo->tid_next);
+        }
+    }
+}
+
+//
+// P_RemoveThingTID
+//
+// Removes the given thing from the tid hash table if it is
+// in it already.
+//
+void P_RemoveThingTID(mobj_t *mo)
+{
+    if (mo->tid > 0 && mo->tid_prevn)
+    {
+        // set previous thing's next field to this thing's next thing
+        *(mo->tid_prevn) = mo->tid_next;
+
+        // set next thing's prev field to this thing's prev field
+        if (mo->tid_next)
+        {
+            mo->tid_next->tid_prevn = mo->tid_prevn;
+        }
+    }
+
+    // clear tid
+    mo->tid = 0;
+}
+
+//
+// P_FindMobjFromTID
+//
+// Like line and sector tag search functions, this function will
+// keep returning the next object with the same tid when called
+// repeatedly with the previous call's return value. Returns NULL
+// once the end of the chain is hit. Calling it again at that point
+// would restart the search from the base of the chain.
+//
+// haleyjd 06/10/06: eliminated infinite loop for TID_TRIGGER
+//
+mobj_t *P_FindMobjFromTID(int tid, mobj_t *rover, mobj_t *trigger)
+{
+    // Normal TIDs
+    if (tid > 0)
+    {
+        rover = rover ? rover->tid_next : tidhash[tid % TIDCHAINS];
+
+        while (rover && rover->tid != tid)
+        {
+            rover = rover->tid_next;
+        }
+
+        return rover;
+    }
+
+    // Reserved TIDs
+    switch (tid)
+    {
+        case 0: // script trigger object (may be NULL, which is fine)
+            return !rover ? trigger : NULL;
+
+        case -1: // players are -1 through -4
+        case -2:
+        case -3:
+        case -4:
+            {
+                int pnum = -tid - 1;
+
+                return !rover && playeringame[pnum] ? players[pnum].mo : NULL;
+            }
+
+        default:
+            return NULL;
+    }
+}
+
+void P_CreateTIDList(void)
+{
+    mobj_t *mobj = NULL;
+
+    for (thinker_t *t = thinkercap.next; t != &thinkercap; t = t->next)
+    {
+        // Search all current thinkers
+        if (t->function != P_MobjThinker)
+        {
+            // Not a mobj thinker
+            continue;
+        }
+
+        mobj = (mobj_t *) t;
+
+        // Add to list
+        if (mobj->tid)
+        {
+            P_AddThingTID(mobj, mobj->tid);
+        }
+    }
 }

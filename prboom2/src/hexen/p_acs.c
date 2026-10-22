@@ -1283,8 +1283,7 @@ static int CmdThingCountDirect(void)
 static void ThingCount(int type, int tid)
 {
     int count;
-    int searcher;
-    mobj_t *mobj;
+    mobj_t *mobj = NULL;
     mobjtype_t moType;
     thinker_t *think;
 
@@ -1294,10 +1293,9 @@ static void ThingCount(int type, int tid)
     }
     moType = TranslateThingType[type];
     count = 0;
-    searcher = -1;
     if (tid)
     {                           // Count TID things
-        while ((mobj = P_FindMobjFromTID(tid, &searcher)) != NULL)
+        while ((mobj = P_FindMobjFromTID(tid, mobj, NULL)))
         {
             if (type == 0)
             {                   // Just count TIDs
@@ -1678,14 +1676,12 @@ static int CmdThingSound(void)
     int tid;
     int sound;
     int volume;
-    mobj_t *mobj;
-    int searcher;
+    mobj_t *mobj = NULL;
 
     volume = Pop();
     sound = S_GetSoundID(StringLookup(Pop()));
     tid = Pop();
-    searcher = -1;
-    while ((mobj = P_FindMobjFromTID(tid, &searcher)) != NULL)
+    while ((mobj = P_FindMobjFromTID(tid, mobj, NULL)))
     {
         S_StartSoundAtVolume(mobj, sound, volume, false, 0);
     }

@@ -576,14 +576,13 @@ void A_CheckThrowBomb(mobj_t * actor)
 
 dboolean A_LocalQuake(byte * args, mobj_t * actor)
 {
-    mobj_t *focus, *target;
-    int lastfound = 0;
+    mobj_t *focus, *target = NULL;
     int success = false;
 
     // Find all quake foci
     do
     {
-        target = P_FindMobjFromTID(args[4], &lastfound);
+        target = P_FindMobjFromTID(args[4], target, NULL);
         if (target)
         {
             focus = P_SpawnMobj(target->x,

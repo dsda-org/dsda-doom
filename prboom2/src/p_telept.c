@@ -33,6 +33,7 @@
 
 #include "doomdef.h"
 #include "doomstat.h"
+#include "p_mobj.h"
 #include "p_spec.h"
 #include "p_maputl.h"
 #include "p_map.h"
@@ -45,7 +46,6 @@
 #include "m_random.h"
 
 #include "dsda/id_list.h"
-#include "dsda/thing_id.h"
 
 // More will be added
 static dboolean P_IsTeleportDestination(mobj_t *mo)
@@ -132,11 +132,9 @@ static mobj_t* P_TeleportDestination(short thing_id, int tag)
   if (thing_id)
   {
     int count = 0;
-    mobj_t *target;
-    thing_id_search_t search;
+    mobj_t *target = NULL;
 
-    dsda_ResetThingIDSearch(&search);
-    while ((target = dsda_FindMobjFromThingID(thing_id, &search)))
+    while ((target = P_FindMobjFromTID(thing_id, target, NULL)))
     {
       if (P_IsTeleportDestination(target))
       {
@@ -152,8 +150,7 @@ static mobj_t* P_TeleportDestination(short thing_id, int tag)
       if (!tag)
       {
         // Fall back on map spots
-        dsda_ResetThingIDSearch(&search);
-        while ((target = dsda_FindMobjFromThingID(thing_id, &search)))
+        while ((target = P_FindMobjFromTID(thing_id, target, NULL)))
         {
           if (P_IsMapSpot(target))
           {
@@ -164,8 +161,7 @@ static mobj_t* P_TeleportDestination(short thing_id, int tag)
         // Fall back on any nonblocking thing
         if (!target)
         {
-          dsda_ResetThingIDSearch(&search);
-          while ((target = dsda_FindMobjFromThingID(thing_id, &search)))
+          while ((target = P_FindMobjFromTID(thing_id, target, NULL)))
           {
             if (!(target->flags & MF_SOLID))
             {
@@ -184,8 +180,7 @@ static mobj_t* P_TeleportDestination(short thing_id, int tag)
         count = 1 + (P_Random(pr_hexen) % count);
       }
 
-      dsda_ResetThingIDSearch(&search);
-      while ((target = dsda_FindMobjFromThingID(thing_id, &search)))
+      while ((target = P_FindMobjFromTID(thing_id, target, NULL)))
       {
         if (P_IsTeleportDestination(target))
         {
@@ -352,13 +347,11 @@ int EV_TeleportGroup(short group_tid, mobj_t *thing, short source_tid, short des
                      dboolean move_source, dboolean fog)
 {
   int result = 0;
-  mobj_t *source;
+  mobj_t *source = NULL;
   mobj_t *dest;
-  mobj_t *target;
-  thing_id_search_t search;
+  mobj_t *target = NULL;
 
-  dsda_ResetThingIDSearch(&search);
-  source = dsda_FindMobjFromThingID(source_tid, &search);
+  source = P_FindMobjFromTID(source_tid, source, NULL);
 
   dest = P_TeleportDestination(dest_tid, 0);
 
@@ -374,8 +367,7 @@ int EV_TeleportGroup(short group_tid, mobj_t *thing, short source_tid, short des
     dcos = finecosine[an >> ANGLETOFINESHIFT];
     dsin = finesine[an >> ANGLETOFINESHIFT];
 
-    dsda_ResetThingIDSearch(&search);
-    while ((target = dsda_FindMobjFromThingIDOrMobj(group_tid, thing, &search)))
+    while ((target = P_FindMobjFromTID(group_tid, target, thing)))
     {
       fixed_t dx, dy;
       mobj_t target_dest;
@@ -406,13 +398,11 @@ int EV_TeleportInSector(int tag, short source_tid, short dest_tid,
                         dboolean fog, short group_tid)
 {
   int result = 0;
-  mobj_t *source;
+  mobj_t *source = NULL;
   mobj_t *dest;
   mobj_t *target;
-  thing_id_search_t search;
 
-  dsda_ResetThingIDSearch(&search);
-  source = dsda_FindMobjFromThingID(source_tid, &search);
+  source = P_FindMobjFromTID(source_tid, source, NULL);
 
   dest = P_TeleportDestination(dest_tid, 0);
 
@@ -791,8 +781,7 @@ dboolean EV_HexenTeleport(int tid, mobj_t * thing, dboolean fog)
 {
     int i;
     int count;
-    mobj_t *mo;
-    int searcher;
+    mobj_t *mo = NULL;
 
     if (!thing)
     {                           // Teleport function called with an invalid mobj
@@ -803,8 +792,7 @@ dboolean EV_HexenTeleport(int tid, mobj_t * thing, dboolean fog)
         return false;
     }
     count = 0;
-    searcher = -1;
-    while (P_FindMobjFromTID(tid, &searcher) != NULL)
+    while (P_FindMobjFromTID(tid, mo, NULL) != NULL)
     {
         count++;
     }
@@ -813,12 +801,11 @@ dboolean EV_HexenTeleport(int tid, mobj_t * thing, dboolean fog)
         return false;
     }
     count = 1 + (P_Random(pr_hexen) % count);
-    searcher = -1;
     mo = NULL;
 
     for (i = 0; i < count; i++)
     {
-        mo = P_FindMobjFromTID(tid, &searcher);
+        mo = P_FindMobjFromTID(tid, mo, NULL);
     }
     if (mo == NULL)
     {
