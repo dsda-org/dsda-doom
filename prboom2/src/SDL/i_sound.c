@@ -35,7 +35,9 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include <limits.h>
 #include <math.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #ifdef HAVE_UNISTD_H
@@ -161,9 +163,27 @@ static void stopchan(int i)
 }
 
 // [FG] support multi-channel samples by converting them to mono first
+
+// SDL 2.0.20's float stereo-to-mono SSE converter uses an aligned load, although
+// SDL_AudioCVT does not require an aligned buffer. Fixed in SDL 2.0.22
+// (libsdl-org/SDL@727eef7064). Z_Malloc only guarantees 8-byte alignment,
+// so align the conversion buffer.
+#define AUDIO_BUFFER_ALIGNMENT 16
+
 static Uint8 *ConvertAudioFormat(void **data, SDL_AudioSpec *sample, Uint32 *len)
 {
   SDL_AudioCVT cvt;
+  size_t bufsize;
+  Uint8 *block, *buf;
+
+  if (*len == 0 || *len > INT_MAX ||
+      sample->freq <= 0 ||
+      sample->channels < 1 || sample->channels > 8)
+  {
+    lprintf(LO_WARN, "Invalid audio format (%d Hz, %d channels, %u bytes), skipping\n",
+            sample->freq, sample->channels, *len);
+    return NULL;
+  }
 
   if (SDL_BuildAudioCVT(&cvt,
                         sample->format, sample->channels, sample->freq,
@@ -173,23 +193,37 @@ static Uint8 *ConvertAudioFormat(void **data, SDL_AudioSpec *sample, Uint32 *len
     return NULL;
   }
 
-  cvt.len = *len;
-  cvt.buf = Z_Malloc(cvt.len * cvt.len_mult);
+  if (cvt.len_mult <= 0 ||
+      (size_t)*len > (size_t)INT_MAX / (size_t)cvt.len_mult ||
+      (size_t)*len > (SIZE_MAX - (AUDIO_BUFFER_ALIGNMENT - 1)) / (size_t)cvt.len_mult)
+  {
+    lprintf(LO_WARN, "Audio conversion buffer is too large, skipping\n");
+    return NULL;
+  }
+
+  bufsize = (size_t)*len * (size_t)cvt.len_mult;
+  cvt.len = (int)*len;
+
+  block = Z_Malloc(bufsize + AUDIO_BUFFER_ALIGNMENT - 1);
+  buf = block + (AUDIO_BUFFER_ALIGNMENT - (uintptr_t)block % AUDIO_BUFFER_ALIGNMENT)
+               % AUDIO_BUFFER_ALIGNMENT;
+  cvt.buf = buf;
   memcpy(cvt.buf, *data, cvt.len);
 
   if (SDL_ConvertAudio(&cvt) < 0)
   {
-    Z_Free(cvt.buf);
+    Z_Free(block);
     lprintf(LO_WARN, "SDL_ConvertAudio: %s\n", SDL_GetError());
     return NULL;
   }
 
   Z_Free(*data);
+  memmove(block, buf, cvt.len_cvt);
 
   sample->channels = 1;
   sample->format = AUDIO_S16;
   sample->freq = snd_samplerate;
-  *data = cvt.buf;
+  *data = block;
   *len = cvt.len_cvt;
 
   return *data;
@@ -239,6 +273,13 @@ static snd_data_t *GetSndData(int sfxid, const unsigned char *data, size_t len)
     if (Load_SNDFile(data, &sample, &sampledata, &samplelen) == NULL)
     {
       lprintf(LO_WARN, "Can't open sfx file: %s\n", S_sfx[sfxid].name);
+      return NULL;
+    }
+
+    if (samplelen > INT_MAX)
+    {
+      Z_Free(sampledata);
+      lprintf(LO_WARN, "Sound effect %s is too long, skipping\n", S_sfx[sfxid].name);
       return NULL;
     }
 
