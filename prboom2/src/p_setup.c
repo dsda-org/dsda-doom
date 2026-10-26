@@ -3970,6 +3970,9 @@ void P_SetupLevel(int episode, int map, int skill)
   {
     AM_Start(AM_OPEN_MINIMAP);
   }
+
+  start_amlinetrace = 0;
+  num_amlinetrace = 0;
 }
 
 //

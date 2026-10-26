@@ -2817,13 +2817,34 @@ static void AM_drawCrosshair(int color)
   V_DrawLine(&line, color);
 }
 
+
+amlinetrace_t amlinetraces[MAXAMLINETRACES] = {0};
+unsigned int start_amlinetrace = 0;
+unsigned int num_amlinetrace = 0;
+
+amlinetrace_t *AM_addLineTrace()
+{
+  unsigned int next;
+  if (num_amlinetrace == MAXAMLINETRACES) {
+    // max reached, displace earliest trace
+    next = start_amlinetrace;
+    start_amlinetrace += 1;
+    start_amlinetrace %= MAXAMLINETRACES;
+  } else {
+    // expand to next free spot
+    next = (start_amlinetrace + num_amlinetrace) % MAXAMLINETRACES;
+    num_amlinetrace++;
+  }
+  return amlinetraces + next;
+}
+
 static void AM_drawLineTraces(void)
 {
-  for (unsigned short i = 0; i < NUMAMLINETRACES; i++)
+  for (unsigned int i = 0; i < num_amlinetrace; i++)
   {
-    amlinetrace_t *p = &amlinetraces[(cur_amlinetrace + i) % NUMAMLINETRACES];
+    amlinetrace_t *p = &amlinetraces[(start_amlinetrace+i) % MAXAMLINETRACES];
     int fade = (leveltime - p->when) << 1;
-    if (fade < 24 && (p->x1 != p->x2 || p->y1 != p->y2))
+    if (0 <= fade && fade < 24 && (p->x1 != p->x2 || p->y1 != p->y2))
     {
       int color;
       mline_t pathline = {
@@ -2843,6 +2864,15 @@ static void AM_drawLineTraces(void)
       // red to fading gray
       color = leveltime <= p->when + 1 ? 176 : 78 + fade;
       AM_drawMline(&pathline, color);
+    }
+    else
+    {
+      // remove from array; could guarrantee that all traces to be removed
+      // are at the start since amlinetraces is non-decreasing in leveltime
+      start_amlinetrace += 1;
+      start_amlinetrace %= MAXAMLINETRACES;
+      num_amlinetrace--;
+      i--;
     }
   }
 }
