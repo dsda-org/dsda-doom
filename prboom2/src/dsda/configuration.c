@@ -187,7 +187,7 @@ void dsda_TrackConfigFeatures(void) {
   if (!dsda_IntConfig(dsda_config_palette_onpowers))
     dsda_TrackFeature(uf_powerpalette);
 
-  if (dsda_IntConfig(dsda_config_gl_health_bar))
+  if (dsda_IntConfig(dsda_config_gl_health_bar) || dsda_IntConfig(dsda_config_gl_health_num))
     dsda_TrackFeature(uf_healthbar);
 
   if (dsda_IntConfig(dsda_config_movement_strafe50))
@@ -635,6 +635,10 @@ dsda_config_t dsda_config[dsda_config_count] = {
   },
   [dsda_config_gl_health_bar] = {
     "gl_health_bar", dsda_config_gl_health_bar,
+    CONF_BOOL(0), NULL, STRICT_INT(0)
+  },
+  [dsda_config_gl_health_num] = {
+    "gl_health_num", dsda_config_gl_health_num,
     CONF_BOOL(0), NULL, STRICT_INT(0)
   },
   [dsda_config_gl_usevbo] = {

@@ -299,6 +299,10 @@ dboolean dsda_ShowHealthBars(void) {
   return dsda_IntConfig(dsda_config_gl_health_bar);
 }
 
+dboolean dsda_ShowHealthNums(void) {
+  return dsda_IntConfig(dsda_config_gl_health_num);
+}
+
 dboolean dsda_WipeAtFullSpeed(void) {
   return dsda_IntConfig(dsda_config_wipe_at_full_speed);
 }

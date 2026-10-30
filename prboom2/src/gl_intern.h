@@ -225,6 +225,8 @@ typedef struct
   float x1, x2, x3;
   float z1, z2, z3;
   float y;
+  int spawnhealth, health; // added for health num
+  dboolean draw_health_num; // make this flags if more settings
 } GLHealthBar;
 
 extern GLSeg *gl_segs;
