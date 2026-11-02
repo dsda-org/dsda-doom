@@ -681,6 +681,10 @@ void P_RemoveActiveCeiling(ceiling_t* ceiling)
 {
   ceilinglist_t *list = ceiling->list;
   ceiling->sector->ceilingdata = NULL;  //jff 2/22/98
+  // [AR] Hexen uses specialdata for floor and ceiling
+  // So we must also clear ceilingdata
+  if (hexen)
+    ceiling->sector->floordata = NULL;
   P_RemoveThinker(&ceiling->thinker);
   P_TagFinished(ceiling->sector->tag);
   if ((*list->prev = list->next))

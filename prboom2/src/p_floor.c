@@ -371,7 +371,10 @@ void T_MoveHexenFloor(floormove_t * floor)
         {
             return;
         }
+        // [AR] Hexen uses specialdata for floor and ceiling
+        // So we must also clear ceilingdata
         floor->sector->floordata = NULL;
+        floor->sector->ceilingdata = NULL;
         if (floor->textureChange)
         {
             floor->sector->floorpic -= floor->textureChange;
