@@ -896,7 +896,7 @@ static void I_FillScreenResolutionsList(void)
   }
 
   // [FG] sort the list
-  SDL_qsort(screen_resolutions_list, list_size, sizeof(*screen_resolutions_list), cmp_resolutions);
+  SDL_qsort((void *)screen_resolutions_list, list_size, sizeof(*screen_resolutions_list), cmp_resolutions);
 
   // [FG] find the desired resolution again
   for (i = 0; i < list_size; i++)
@@ -1466,7 +1466,7 @@ static void CorrectMouseStutter(int *x, int *y)
     return;
   }
 
-  fractic = dsda_TickElapsedTime();
+  fractic = (fixed_t)dsda_TickElapsedTime();
 
   *x += x_remainder_old;
   *y += y_remainder_old;

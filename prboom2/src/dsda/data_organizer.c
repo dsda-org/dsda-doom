@@ -93,7 +93,7 @@ static void dsda_InitWadDataDir(void) {
 
     start = PathFindFileName(wadfiles[i].name);
 
-    length = strlen(start) - 4;
+    length = (int)strlen(start) - 4;
 
     if (length > 0 && !strcasecmp(start + length, ".wad")) {
       int dir_index;

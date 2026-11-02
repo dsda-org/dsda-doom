@@ -147,7 +147,7 @@ size_t ppm_to_patch(void **lumpdata, const char *filename,
 
   for (offset = 8+4*width, i = 0; i < width; i++)
   {
-    ((int *)(patch+8))[i] = LONG(offset);
+    ((int *)(patch+8))[i] = LONG((int)offset);
     offset += columnsizes[i];
   }
 

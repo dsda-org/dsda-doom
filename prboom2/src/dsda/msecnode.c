@@ -136,7 +136,7 @@ void dsda_ArchiveMSecNodes(void) {
 
     msecnode = ((mobj_t*) th)->touching_sectorlist;
     while (msecnode) {
-      sector_i = msecnode->m_sector - sectors;
+      sector_i = (int)(msecnode->m_sector - sectors);
 
       P_SAVE_X(sector_i);
 

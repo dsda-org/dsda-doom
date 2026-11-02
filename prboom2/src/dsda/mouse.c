@@ -52,7 +52,7 @@ void dsda_ApplyQuickstartMouseCache(int* mousex) {
   else {
     angleturn_cache[angleturn_cache_index] = *mousex;
     ++angleturn_cache_index;
-    if (angleturn_cache_index >= quickstart_cache_tics)
+    if (angleturn_cache_index >= (unsigned int)quickstart_cache_tics)
       angleturn_cache_index = 0;
   }
 }

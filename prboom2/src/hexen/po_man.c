@@ -153,7 +153,7 @@ void T_RotatePoly(polyevent_t * pe)
         {
             StopPolyEvent(pe);
         }
-        if (pe->dist < absSpeed)
+        if (pe->dist < (unsigned int)absSpeed)
         {
             pe->speed = pe->dist * (pe->speed < 0 ? -1 : 1);
         }
@@ -263,7 +263,7 @@ void T_MovePoly(polyevent_t * pe)
         {
             StopPolyEvent(pe);
         }
-        if (pe->dist < absSpeed)
+        if (pe->dist < (unsigned int)absSpeed)
         {
             pe->speed = pe->dist * (pe->speed < 0 ? -1 : 1);
             pe->xSpeed = FixedMul(pe->speed, finecosine[pe->angle]);

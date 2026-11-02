@@ -1402,7 +1402,7 @@ void SetRatio(int width, int height)
   if (tallscreen)
   {
     float ratio_quotient = (float)ratio_multiplier/ratio_scale;
-    float ratio_percentage = (ratio_quotient - 1) * 100.0;
+    float ratio_percentage = (ratio_quotient - 1) * 100.0f;
     psprite_offset = (int)(ratio_percentage*FRACUNIT);
 
     lprintf(LO_DEBUG, "SetRatio: tallscreen aspect recognized; flipping multiplier\n");
@@ -1590,7 +1590,7 @@ void V_DrawRawScreenSection(const char *lump_name, int source_offset, int dest_y
   // though that means there needs to be a software version too (that's ideally a
   // bit more efficient than the current code's thousands-of-little-boxes approach)
   if (V_IsOpenGLMode()) {
-    gld_FillRawName(lump_name, x_offset, y_offset, lump_width, 200, lump_width * x_factor, 200 * y_factor, VPT_STRETCH_REAL);
+    gld_FillRawName(lump_name, x_offset, y_offset, lump_width, 200, (int)(lump_width * x_factor), (int)(200 * y_factor), VPT_STRETCH_REAL);
     return;
   }
 

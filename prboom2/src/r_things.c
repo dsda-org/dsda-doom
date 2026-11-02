@@ -514,7 +514,7 @@ void R_DrawMaskedColumn(
 static void R_SetSpritelights(int lightlevel)
 {
   int lightnum = (lightlevel >> LIGHTSEGSHIFT) + (extralight * LIGHTBRIGHT);
-  spritelights = scalelight[BETWEEN(0, LIGHTLEVELS - 1, lightnum)];
+  spritelights = scalelight[CLAMP(lightnum, 0, LIGHTLEVELS - 1)];
 }
 
 
@@ -613,7 +613,7 @@ static void R_DrawVisSprite(vissprite_t *vis)
 
   if (vis->floorclip && !(vis->mobjflags & MF_PLAYERSPRITE))
   {
-    fixed_t sprbotscreen = sprtopscreen + FixedMul(LittleShort(patch->height) << FRACBITS, spryscale);
+    fixed_t sprbotscreen = (fixed_t)(sprtopscreen + FixedMul(LittleShort(patch->height) << FRACBITS, spryscale));
     dcvars.baseclip = (sprbotscreen - FixedMul(vis->floorclip, spryscale)) >> FRACBITS;
   }
 

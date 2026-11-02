@@ -120,10 +120,10 @@ int gld_wipe_doMelt(int ticks, int *y_lookup)
     tx = (float) MIN(fU2, (float)scaled_i / (float)total_w);
     tx2 = (float) MIN(fU2, (float)scaled_i2 / (float)total_w);
 
-    glTexCoord2f(tx, fV1); glVertex2f(i, yoffs);
-    glTexCoord2f(tx, fV2); glVertex2f(i, yoffs + SCREENHEIGHT);
-    glTexCoord2f(tx2, fV1); glVertex2f(i2, yoffs);
-    glTexCoord2f(tx2, fV2); glVertex2f(i2, yoffs + SCREENHEIGHT);
+    glTexCoord2f(tx, fV1); glVertex2f((float)i, (float)yoffs);
+    glTexCoord2f(tx, fV2); glVertex2f((float)i, (float)(yoffs + SCREENHEIGHT));
+    glTexCoord2f(tx2, fV1); glVertex2f((float)i2, (float)yoffs);
+    glTexCoord2f(tx2, fV2); glVertex2f((float)i2, (float)(yoffs + SCREENHEIGHT));
   }
   glEnd();
 

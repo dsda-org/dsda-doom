@@ -29,7 +29,7 @@ int dsda_HudComponentY(int y_offset, int vpt, double ratio) {
   int vpt_align;
 
   if (ratio)
-    y_offset *= ratio;
+    y_offset = (int)(y_offset * ratio);
 
   vpt_align = vpt & VPT_ALIGN_MASK;
   if (BOTTOM_ALIGNMENT(vpt_align)) {

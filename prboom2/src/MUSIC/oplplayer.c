@@ -388,12 +388,16 @@ static dboolean LoadInstrumentTable(void)
     percussion_instrs = main_instrs + GENMIDI_NUM_INSTRS;
 
     // There's no way for c to define a const array
+    #if defined(__GNUC__) || defined(__clang__)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wcast-qual"
+    #endif
     main_instr_names =
         (char (*)[32]) (percussion_instrs + GENMIDI_NUM_PERCUSSION);
     percussion_names = main_instr_names + GENMIDI_NUM_INSTRS;
+    #if defined(__GNUC__) || defined(__clang__)
     #pragma GCC diagnostic pop
+    #endif
 
     return true;
 }
@@ -729,7 +733,7 @@ static void KeyOffEvent(opl_track_data_t *track, midi_event_t *event)
     // Turn off voices being used to play this key.
     // If it is a double voice instrument there will be two.
 
-    for (i = 0; i < voice_alloced_num; i++)
+    for (i = 0; i < (unsigned int)voice_alloced_num; ++i)
     {
         if (voice_alloced_list[i]->channel == channel
          && voice_alloced_list[i]->key == key)
@@ -810,7 +814,7 @@ static void ReplaceExistingVoiceDoom2(opl_channel_data_t *channel)
 
     for (i = 0; i < voice_alloced_num - 3; i++)
     {
-        if (voice_alloced_list[i]->priority < priority
+        if (voice_alloced_list[i]->priority < (unsigned int)priority
          && voice_alloced_list[i]->channel >= channel)
         {
             priority = voice_alloced_list[i]->priority;
@@ -1035,7 +1039,7 @@ static void KeyOnEvent(opl_track_data_t *track, midi_event_t *event)
             {
                 voicenum = 1;
             }
-            while (voice_alloced_num > num_opl_voices - voicenum)
+            while ((unsigned int)voice_alloced_num > ((unsigned int)num_opl_voices - voicenum))
             {
                 ReplaceExistingVoiceDoom1();
             }
@@ -1112,12 +1116,12 @@ static void SetChannelVolume(opl_channel_data_t *channel, unsigned int volume,
 
     channel->volume_base = volume;
 
-    if (volume > current_music_volume)
+    if (volume > (unsigned int)current_music_volume)
     {
         volume = current_music_volume;
     }
 
-    if (clip_start && volume > start_music_volume)
+    if (clip_start && volume > (unsigned int)start_music_volume)
     {
         volume = start_music_volume;
     }
@@ -1126,7 +1130,7 @@ static void SetChannelVolume(opl_channel_data_t *channel, unsigned int volume,
 
     // Update all voices that this channel is using.
 
-    for (i = 0; i < num_opl_voices; ++i)
+    for (i = 0; i < (unsigned int)num_opl_voices; ++i)
     {
         if (voices[i].channel == channel)
         {
@@ -1167,7 +1171,7 @@ static void SetChannelPan(opl_channel_data_t *channel, unsigned int pan)
         if (channel->pan != reg_pan)
         {
             channel->pan = reg_pan;
-            for (i = 0; i < num_opl_voices; i++)
+            for (i = 0; i < (unsigned int)num_opl_voices; i++)
             {
                 if (voices[i].channel == channel)
                 {
@@ -1254,7 +1258,7 @@ static void PitchBendEvent(opl_track_data_t *track, midi_event_t *event)
 
     // Update all voices for this channel.
 
-    for (i = 0; i < voice_alloced_num; ++i)
+    for (i = 0; i < (unsigned int)voice_alloced_num; ++i)
     {
         if (voice_alloced_list[i]->channel == channel)
         {
@@ -1509,10 +1513,14 @@ static void I_OPL_PlaySong(const void *handle, int looping)
     }
 
     // This is required to interface with OPL (I think)
+    #if defined(__GNUC__) || defined(__clang__)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wcast-qual"
+    #endif
     file = (midi_file_t*)handle;
+    #if defined(__GNUC__) || defined(__clang__)
     #pragma GCC diagnostic pop
+    #endif
 
     // Allocate track data.
 
@@ -1558,7 +1566,7 @@ static void I_OPL_PauseSong(void)
     // Turn off all main instrument voices (not percussion).
     // This is what Vanilla does.
 
-    for (i = 0; i < num_opl_voices; ++i)
+    for (i = 0; i < (unsigned int)num_opl_voices; ++i)
     {
         if (voices[i].channel != NULL
          && voices[i].current_instr < percussion_instrs)
@@ -1623,10 +1631,14 @@ static void I_OPL_UnRegisterSong(const void *handle)
     if (handle != NULL)
     {
         // This is required to interface with OPL (I think)
+        #if defined(__GNUC__) || defined(__clang__)
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wcast-qual"
+        #endif
         MIDI_FreeFile((midi_file_t *) handle);
+        #if defined(__GNUC__) || defined(__clang__)
         #pragma GCC diagnostic pop
+        #endif
     }
 }
 

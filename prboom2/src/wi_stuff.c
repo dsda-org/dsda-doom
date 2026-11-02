@@ -2013,8 +2013,8 @@ void WI_checkForAccelerate(void)
 //
 void WI_Ticker(void)
 {
-  if (heretic) return IN_Ticker();
-  if (hexen) return Hexen_IN_Ticker();
+  if (heretic)  RETURN(IN_Ticker());
+  if (hexen)    RETURN(Hexen_IN_Ticker());
 
   // counter for general background animation
   bcnt++;
@@ -2122,8 +2122,8 @@ void WI_loadData(void)
 //
 void WI_Drawer (void)
 {
-  if (heretic) return IN_Drawer();
-  if (hexen) return Hexen_IN_Drawer();
+  if (heretic)  RETURN(IN_Drawer());
+  if (hexen)    RETURN(Hexen_IN_Drawer());
 
   switch (state)
   {
@@ -2200,8 +2200,8 @@ void WI_Start(wbstartstruct_t* wbstartstruct)
   exitpic = dsda_ExitPic();
   enterpic = dsda_EnterPic();
   
-  if (heretic) return IN_Start(wbstartstruct);
-  if (hexen) return Hexen_IN_Start(wbstartstruct);
+  if (heretic)  RETURN(IN_Start(wbstartstruct));
+  if (hexen)    RETURN(Hexen_IN_Start(wbstartstruct));
 
   WI_initVariables(wbstartstruct);
   WI_loadData();

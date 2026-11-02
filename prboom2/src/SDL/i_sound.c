@@ -604,11 +604,11 @@ int I_StartSound(int id, int channel, sfx_params_t *params)
   // not in a memory mapped one
   data = (const unsigned char *)W_LockLumpNum(lump);
 
-  if (IsDMXSound(data, len))
+  if (IsDMXSound(data, (int)len))
   {
     const int dmx_len = GetDMXLength(data);
 
-    if (IsValidDMXSound(dmx_len, len))
+    if (IsValidDMXSound(dmx_len, (int)len))
     {
       cinfo.data = &data[DMXHDRSIZE + DMXPADSIZE];
       cinfo.enddata = &cinfo.data[dmx_len - DMXPADSIZE * 2 - 1];
@@ -724,7 +724,7 @@ static void I_UpdateSound(void *unused, Uint8 *stream, int len)
 
   // NSM: when dumping sound, ignore the callback calls and only
   // service dumping calls
-  if (dumping_sound && unused != (void *) 0xdeadbeef)
+  if (dumping_sound && unused != (void *) (uintptr_t)0xdeadbeef)
     return;
 
   // do music update
@@ -1081,7 +1081,7 @@ unsigned char *I_GrabSound (int len)
   if (buffer)
   {
     memset (buffer, 0, size);
-    I_UpdateSound ((void *) 0xdeadbeef, buffer, size);
+    I_UpdateSound ((void *) (uintptr_t)0xdeadbeef, buffer, (int)size);
   }
   return buffer;
 }
@@ -1376,7 +1376,7 @@ int I_RegisterSong(const void *data, size_t len)
 
   music[0] = NULL;
 
-  rwops_stream = SDL_RWFromConstMem(data, len);
+  rwops_stream = SDL_RWFromConstMem(data, (int)len);
   if (rwops_stream)
   {
     music[0] = Mix_LoadMUS_RW(rwops_stream, SDL_FALSE);
@@ -1513,7 +1513,7 @@ static int RegisterSongEx (const void *data, size_t len, int try_mus2mid)
           found = 1;
           if (music_player_was_init[i])
           {
-            const void *temp_handle = music_players[i]->registersong (data, len);
+            const void *temp_handle = music_players[i]->registersong (data, (unsigned int)len);
             if (temp_handle)
             {
               SDL_LockMutex (musmutex);

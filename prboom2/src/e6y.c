@@ -582,7 +582,7 @@ void e6y_WriteStats(void)
 
   for(i=0; i<TT_MAX; i++) {
     snprintf(str, sizeof(str), "%d", max.stat[i]);
-    max.stat[i] = strlen(str);
+    max.stat[i] = (int)strlen(str);
   }
 
   for (level=0;level<numlevels;level++)
@@ -641,7 +641,7 @@ int AccelerateMouse(int val)
 int AccelerateAnalog(float val)
 {
   if (!analog_accelfactor)
-    return val;
+    return (int)val;
 
   if (val < 0)
     return -AccelerateAnalog(-val);
@@ -868,7 +868,7 @@ int GetFullPath(const char* FileName, const char* ext, char *Buffer, size_t Buff
       break;
     }
 
-    Result = SearchPath(dir,FileName,ext,BufferLength,Buffer,&p);
+    Result = SearchPath(dir,FileName,ext,(DWORD)BufferLength,Buffer,&p);
     if (Result)
       return Result;
   }

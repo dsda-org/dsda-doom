@@ -173,7 +173,7 @@ static void R_DRAWCOLUMN_FUNCNAME(draw_column_vars_t *dcvars)
       const fixed_t maxfrac = (dcvars->pspritepostheight << FRACBITS) - 1;
 
       while (count--) {
-        const fixed_t pspritefrac = BETWEEN(0, maxfrac, frac);
+        const fixed_t pspritefrac = CLAMP(frac, 0, maxfrac);
 
         *dest = GETCOL(pspritefrac);
         dest += 4;

@@ -46,7 +46,7 @@ static int clock_gettime(int clockid, struct timespec *tp) {
   QueryPerformanceCounter((LARGE_INTEGER*) &time);
 
   // Convert timer counts to timespec (that is, nanoseconds and seconds)
-  tp->tv_nsec = time % timer_frequency * 1000000000 / timer_frequency;
+  tp->tv_nsec = (long)(time % timer_frequency * 1000000000 / timer_frequency);
   tp->tv_sec = time / timer_frequency;
 
   return 0;
@@ -97,7 +97,7 @@ static void dsda_Throttle(int timer, unsigned long long target_time) {
     // Sleeping doesn't have high accuracy
     remaining_time = target_time - elapsed_time;
     if (remaining_time > 1000)
-      I_uSleep(remaining_time - 1000);
+      I_uSleep((unsigned long)(remaining_time - 1000));
   }
 }
 
@@ -156,8 +156,8 @@ int dsda_GetTickRealTime(void) {
 
   t = dsda_RealTime();
 
-  i = t * TICRATE / 1000000;
-  ms_to_next_tick = (i + 1) * 1000 / TICRATE - t / 1000;
+  i = (int)(t * TICRATE / 1000000);
+  ms_to_next_tick = (int)((i + 1) * 1000 / TICRATE - t / 1000);
   if (ms_to_next_tick > 1000 / TICRATE) ms_to_next_tick = 1;
   if (ms_to_next_tick < 1) ms_to_next_tick = 0;
   return i;
@@ -173,8 +173,8 @@ static int dsda_GetTickScaledTime(void) {
 
   t = dsda_RealTime();
 
-  i = t * TICRATE * dsda_GameSpeed() / 100 / 1000000;
-  ms_to_next_tick = dsda_TickMS(i + 1) - t / 1000;
+  i = (int)(t * TICRATE * dsda_GameSpeed() / 100 / 1000000);
+  ms_to_next_tick = (int)(dsda_TickMS(i + 1) - t / 1000);
   if (ms_to_next_tick > dsda_TickMS(1)) ms_to_next_tick = 1;
   if (ms_to_next_tick < 1) ms_to_next_tick = 0;
   return i;

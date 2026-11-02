@@ -84,7 +84,7 @@ static int dsda_WadCompatibilityLevel(void) {
   if (numwadfiles != last_numwadfiles) {
     int num;
 
-    last_numwadfiles = numwadfiles;
+    last_numwadfiles = (int)numwadfiles;
     num = W_CheckNumForName("COMPLVL");
 
     if (num != LUMP_NOT_FOUND) {

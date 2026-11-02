@@ -139,7 +139,7 @@ static int fl_sfread(void *buf, fl_sfread_count_t count, void *handle)
 
 static int fl_sfseek(void *handle, fl_sfseek_offset_t offset, int origin)
 {
-  if (mem_fseek((MEMFILE *)handle, offset, origin) < 0)
+  if (mem_fseek((MEMFILE *)handle, (long)offset, origin) < 0)
   {
     return FLUID_FAILED;
   }

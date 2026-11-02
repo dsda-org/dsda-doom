@@ -128,7 +128,7 @@ static void dsda_UpdateConsoleDisplay(void) {
 }
 
 static void dsda_ResetConsoleEntry(void) {
-  console_entry_index = strlen(console_entry->text);
+  console_entry_index = (int)strlen(console_entry->text);
   dsda_UpdateConsoleDisplay();
 }
 
@@ -2628,21 +2628,28 @@ void dsda_UpdateConsoleText(char* text) {
   int i;
   int length;
 
-  length = strlen(text);
+  length = (int)strlen(text);
 
   for (i = 0; i < length; ++i) {
+    char ch = text[i];
+    int len;
     int shift_i;
 
-    if (text[i] < 32 || text[i] > 126)
+    if (ch < 32 || ch > 126)
       continue;
 
-    if (console_entry_index > CONSOLE_ENTRY_SIZE - 2)
-      console_entry_index = CONSOLE_ENTRY_SIZE - 2;
+    ch = (char)tolower((unsigned char)ch);
+    len = (int)strlen(console_entry->text);
 
-    for (shift_i = strlen(console_entry->text) - 1; shift_i > console_entry_index; --shift_i)
-      console_entry->text[shift_i] = console_entry->text[shift_i - 1];
+    // clamp cursor
+    if (console_entry_index < 0) console_entry_index = 0;
+    if (console_entry_index > len) console_entry_index = len;
 
-    console_entry->text[console_entry_index] = tolower(text[i]);
+    // Insert text instead of replacing it
+    for (shift_i = len; shift_i >= console_entry_index; --shift_i)
+      console_entry->text[shift_i + 1] = console_entry->text[shift_i];
+
+    console_entry->text[console_entry_index] = ch;
     ++console_entry_index;
   }
 
@@ -2705,13 +2712,13 @@ void dsda_UpdateConsole(int action) {
   else if (action == MENU_UP) {
     if (console_entry->prev)
       console_entry = console_entry->prev;
-    console_entry_index = strlen(console_entry->text);
+    console_entry_index = (int)strlen(console_entry->text);
     dsda_UpdateConsoleDisplay();
   }
   else if (action == MENU_DOWN) {
     if (console_entry->next)
       console_entry = console_entry->next;
-    console_entry_index = strlen(console_entry->text);
+    console_entry_index = (int)strlen(console_entry->text);
     dsda_UpdateConsoleDisplay();
   }
   else if (action == MENU_RIGHT && console_entry->text[console_entry_index]) {

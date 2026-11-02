@@ -258,10 +258,14 @@ static const void *vorb_registersong (const void *data, unsigned len)
   vorb_pos = 0;
 
   // This is required to interface with vorbis (I guess)
+  #if defined(__GNUC__) || defined(__clang__)
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wcast-qual"
+  #endif
   i = ov_test_callbacks ((void *) data, &vf, NULL, 0, vcallback);
+  #if defined(__GNUC__) || defined(__clang__)
   #pragma GCC diagnostic pop
+  #endif
 
   if (i != 0)
   {

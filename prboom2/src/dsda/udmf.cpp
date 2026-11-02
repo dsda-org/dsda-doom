@@ -84,12 +84,12 @@ static char* dsda_FloatString(Scanner &scanner) {
 
 #define SCAN_INT(x)  { scanner.MustGetToken('='); \
                        scanner.MustGetInteger(); \
-                       x = scanner.number; \
+                       x = (int)scanner.number; \
                        scanner.MustGetToken(';'); }
 
 #define SCAN_FLOAT(x) { scanner.MustGetToken('='); \
                         scanner.MustGetFloat(); \
-                        x = scanner.decimal; \
+                        x = (float)scanner.decimal; \
                         scanner.MustGetToken(';'); }
 
 #define SCAN_FLAG(x, f) { scanner.MustGetToken('='); \
@@ -845,7 +845,7 @@ static void dsda_ParseUDMFIdentifier(Scanner &scanner) {
 udmf_t udmf;
 
 void dsda_ParseUDMF(const unsigned char* buffer, size_t length, udmf_errorfunc err) {
-  Scanner scanner((const char*) buffer, length);
+  Scanner scanner((const char*) buffer, (int)length);
 
   scanner.SetErrorCallback(err);
 

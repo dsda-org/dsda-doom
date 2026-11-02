@@ -58,10 +58,14 @@ MEMFILE *mem_fopen_read(const void *buf, size_t buflen)
 
   // The MEMFILE struct is overloaded for both read-only and write use cases
   // This is required to interface with 3rd party libraries (I think)
+  #if defined(__GNUC__) || defined(__clang__)
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wcast-qual"
+  #endif
   file->buf = (unsigned char *) buf;
+  #if defined(__GNUC__) || defined(__clang__)
   #pragma GCC diagnostic pop
+  #endif
   file->buflen = buflen;
   file->position = 0;
   file->mode = MODE_READ;
@@ -96,7 +100,7 @@ size_t mem_fread(void *buf, size_t size, size_t nmemb, MEMFILE *stream)
 
   // Update position
 
-  stream->position += items * size;
+  stream->position += (unsigned int)(items * size);
 
   return items;
 }
@@ -148,7 +152,7 @@ size_t mem_fwrite(const void *ptr, size_t size, size_t nmemb, MEMFILE *stream)
   // Copy into buffer
 
   memcpy(stream->buf + stream->position, ptr, bytes);
-  stream->position += bytes;
+  stream->position += (unsigned int)bytes;
 
   if (stream->position > stream->buflen)
     stream->buflen = stream->position;

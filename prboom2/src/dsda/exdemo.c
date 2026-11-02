@@ -426,7 +426,7 @@ static void DemoEx_GetFeatures(const wadinfo_t* header) {
       char current_text[3];
       strncpy(current_text, ftext + i * 2, 2);
       current_text[2] = '\0';
-      features[ftext_slots - i - 1] = strtol(current_text, NULL, 16);
+      features[ftext_slots - i - 1] = (byte)strtol(current_text, NULL, 16);
 
       // Add it to the padded features as well
       if (i < FEATURE_SLOTS)
@@ -580,7 +580,7 @@ void dsda_LoadExDemo(const char* filename) {
 int dsda_CopyExDemo(const byte** buffer, int* length) {
   if (exdemo.demo) {
     *buffer = exdemo.demo;
-    *length = exdemo.demo_size;
+    *length = (int)exdemo.demo_size;
 
     return true;
   }

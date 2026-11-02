@@ -290,7 +290,7 @@ void dsda_ParseOptionsLump(void) {
       if (!strncmp(key, option_list[i].key, OPTIONS_LINE_LENGTH)) {
         if (option_list[i].value) {
           parsed_option_list[i].found = true;
-          parsed_option_list[i].value = BETWEEN(option_list[i].min, option_list[i].max, value);
+          parsed_option_list[i].value = CLAMP(value, option_list[i].min, option_list[i].max);
         }
         else
           dsda_UpdateIntConfig(option_list[i].config_key, value, false);

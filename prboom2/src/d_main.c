@@ -932,7 +932,7 @@ void D_AddFile (const char *file, wad_source_t source)
   wadfiles[numwadfiles].handle = 0;
 
   // No Rest For The Living
-  len=strlen(wadfiles[numwadfiles].name);
+  len=(int)strlen(wadfiles[numwadfiles].name);
   if (len>=9 && !strnicmp(wadfiles[numwadfiles].name+len-9,"nerve.wad",9))
     gamemission = pack_nerve;
 
@@ -1550,7 +1550,7 @@ static void D_AutoloadPWadDir()
 {
   int i;
 
-  autoload_deh_pwad_count = numwadfiles;
+  autoload_deh_pwad_count = (int)numwadfiles;
   autoload_deh_pwad_queue = Z_Calloc(autoload_deh_pwad_count, sizeof(*autoload_deh_pwad_queue));
 
   for (i = 0; i < numwadfiles; ++i)

@@ -274,7 +274,7 @@ void SpechitOverrun(spechit_overrun_param_t *params)
 
       // Calculate address used in doom2.exe
 
-      addr = spechit_baseaddr + (params->line - lines) * 0x3E;
+      addr = (unsigned int)(spechit_baseaddr + (params->line - lines) * 0x3E);
 
       if (compatibility_level == dosdoom_compatibility || compatibility_level == tasdoom_compatibility)
       {

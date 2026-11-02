@@ -80,7 +80,7 @@ fixed_t dsda_FixedDistancePointToLine(fixed_t line_x1, fixed_t line_y1,
 fixed_t dsda_FloatToFixed(float x);
 fixed_t dsda_StringToFixed(const char* x);
 byte dsda_FloatToPercent(float x);
-int dsda_IntToFixed(int x);
+fixed_t dsda_IntToFixed(int x);
 angle_t dsda_DegreesToAngle(float x);
 
 #define DO_ONCE { static int do_once = true; if (do_once) {

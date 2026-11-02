@@ -396,7 +396,7 @@ static void P_LoadUDMFVertexes(int lump)
 {
   int i;
 
-  numvertexes = udmf.num_vertices;
+  numvertexes = (int)udmf.num_vertices;
   vertexes = calloc_IfSameLevel(vertexes, numvertexes, sizeof(vertex_t));
 
   for (i = 0; i < numvertexes; ++i)
@@ -832,7 +832,7 @@ static void P_LoadUDMFSectors(int lump)
 {
   int i;
 
-  numsectors = udmf.num_sectors;
+  numsectors = (int)udmf.num_sectors;
   sectors = calloc_IfSameLevel(sectors, numsectors, sizeof(sector_t));
 
   dsda_ResetSectorIDList(numsectors);
@@ -1091,7 +1091,7 @@ static byte *P_DecompressData(const byte **data, int *len)
 
   // first estimate for compression rate:
   // output buffer size == 2.5 * input size
-  outlen = 2.5 * *len;
+  outlen = (int)(2.5 * *len);
   output = Z_Malloc(outlen);
 
   // initialize stream state for decompression
@@ -1397,7 +1397,7 @@ static void P_LoadZNodes(int lump, int glnodes)
       Z_Free(vertexes);
       vertexes = newvertarray;
 
-      if (orgVerts + newVerts < numvertexes)
+      if (orgVerts + newVerts < (unsigned int)numvertexes)
       {
         lprintf(LO_WARN, "Warning: inconsistent nodes detected\n");
         inconsistent_nodes = true;
@@ -1469,7 +1469,7 @@ static void P_LoadZNodes(int lump, int glnodes)
 
     seg_size = (glnodes < 2 ? sizeof(mapseg_znod_t) : sizeof(mapseg_znod2_t));
 
-    CheckZNodesOverflow(&len, numsegs * seg_size);
+    CheckZNodesOverflow(&len, (int)(numsegs * seg_size));
     P_LoadGLZSegs(data, glnodes);
     data += numsegs * seg_size;
   }
@@ -1483,7 +1483,7 @@ static void P_LoadZNodes(int lump, int glnodes)
   nodes = calloc_IfSameLevel(nodes, numNodes, sizeof(node_t));
 
   node_size = (glnodes < 3 ? sizeof(mapnode_znod_t) : sizeof(mapnode_znod2_t));
-  CheckZNodesOverflow(&len, numNodes * node_size);
+  CheckZNodesOverflow(&len, (int)(numNodes * node_size));
   for (i = 0; i < numNodes; i++)
   {
     int j, k;
@@ -1629,7 +1629,7 @@ static void P_LoadThings(int lump)
   const hexen_mapthing_t *hexen_data;
   const doom_mapthing_t *doom_data;
 
-  numthings = W_LumpLength (lump) / map_format.mapthing_size;
+  numthings = (int)(W_LumpLength (lump) / map_format.mapthing_size);
   data = W_LumpByNum(lump);
   hexen_data = (const hexen_mapthing_t*) data;
   doom_data = (const doom_mapthing_t*) data;
@@ -1707,7 +1707,7 @@ static void P_LoadUDMFThings(int lump)
   int mobjcount;
   mobj_t **mobjlist;
 
-  numthings = udmf.num_things;
+  numthings = (int)udmf.num_things;
   mobjcount = 0;
   mobjlist = Z_Malloc(numthings * sizeof(mobjlist[0]));
 
@@ -2040,7 +2040,7 @@ static void P_LoadLineDefs (int lump)
   const byte *data; // cph - const*
   int  i;
 
-  numlines = W_LumpLength (lump) / map_format.maplinedef_size;
+  numlines = (int)(W_LumpLength (lump) / map_format.maplinedef_size);
   lines = calloc_IfSameLevel(lines, numlines, sizeof(line_t));
   data = W_LumpByNum (lump); // cph - wad lump handling updated
 
@@ -2107,7 +2107,7 @@ static void P_LoadUDMFLineDefs(int lump)
 {
   int i;
 
-  numlines = udmf.num_lines;
+  numlines = (int)udmf.num_lines;
   lines = calloc_IfSameLevel(lines, numlines, sizeof(line_t));
 
   dsda_ResetLineIDList(numlines);
@@ -2353,7 +2353,7 @@ void P_PostProcessZDoomLineSpecial(line_t *ld)
       const int *id_p;
 
       alpha = (float) ld->special_args[1] / 256.f;
-      alpha = BETWEEN(0.f, 1.f, alpha);
+      alpha = CLAMP(alpha, 0.f, 1.f);
 
       if (!ld->special_args[0])
       {
@@ -2405,7 +2405,7 @@ static void P_AllocateSideDefs (int lump)
 
 static void P_AllocateUDMFSideDefs(int lump)
 {
-  numsides = udmf.num_sides;
+  numsides = (int)udmf.num_sides;
   sides = calloc_IfSameLevel(sides, numsides, sizeof(side_t));
 }
 
@@ -2517,12 +2517,12 @@ static void P_LoadUDMFSideDefs(int lump)
     sd->textureoffset = dsda_IntToFixed(msd->offsetx);
     sd->rowoffset = dsda_IntToFixed(msd->offsety);
 
-    sd->textureoffset_top = dsda_IntToFixed(msd->offsetx_top);
-    sd->textureoffset_mid = dsda_IntToFixed(msd->offsetx_mid);
-    sd->textureoffset_bottom = dsda_IntToFixed(msd->offsetx_bottom);
-    sd->rowoffset_top = dsda_IntToFixed(msd->offsety_top);
-    sd->rowoffset_mid = dsda_IntToFixed(msd->offsety_mid);
-    sd->rowoffset_bottom = dsda_IntToFixed(msd->offsety_bottom);
+    sd->textureoffset_top = dsda_FloatToFixed(msd->offsetx_top);
+    sd->textureoffset_mid = dsda_FloatToFixed(msd->offsetx_mid);
+    sd->textureoffset_bottom = dsda_FloatToFixed(msd->offsetx_bottom);
+    sd->rowoffset_top = dsda_FloatToFixed(msd->offsety_top);
+    sd->rowoffset_mid = dsda_FloatToFixed(msd->offsety_mid);
+    sd->rowoffset_bottom = dsda_FloatToFixed(msd->offsety_bottom);
 
     sd->scalex_top = dsda_FloatToFixed(msd->scalex_top);
     sd->scaley_top = dsda_FloatToFixed(msd->scaley_top);

@@ -153,13 +153,13 @@ int OPL_Queue_Pop(opl_callback_queue_t *queue,
         child1 = i * 2 + 1;
         child2 = i * 2 + 2;
 
-        if (child1 < queue->num_entries
+        if (child1 < (int)queue->num_entries
          && queue->entries[child1].time < entry->time)
         {
             // Left child is less than entry.
             // Use the minimum of left and right children.
 
-            if (child2 < queue->num_entries
+            if (child2 < (int)queue->num_entries
              && queue->entries[child2].time < queue->entries[child1].time)
             {
                 next_i = child2;
@@ -169,7 +169,7 @@ int OPL_Queue_Pop(opl_callback_queue_t *queue,
                 next_i = child1;
             }
         }
-        else if (child2 < queue->num_entries
+        else if (child2 < (int)queue->num_entries
               && queue->entries[child2].time < entry->time)
         {
             // Right child is less than entry.  Go down the right side.
@@ -215,7 +215,7 @@ void OPL_Queue_AdjustCallbacks(opl_callback_queue_t *queue,
     int64_t offset;
     int i;
 
-    for (i = 0; i < queue->num_entries; ++i)
+    for (i = 0; i < (int)queue->num_entries; ++i)
     {
         offset = queue->entries[i].time - time;
         queue->entries[i].time = time + (uint64_t) (offset / factor);

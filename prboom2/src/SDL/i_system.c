@@ -136,7 +136,7 @@ fixed_t I_GetTimeFrac (void)
     tic_time = dsda_TickElapsedTime();
 
     frac = (fixed_t) (tic_time * FRACUNIT * tics_per_usec);
-    frac = BETWEEN(0, FRACUNIT, frac);
+    frac = CLAMP(frac, 0, FRACUNIT);
 
     if (frac < last_frac && last_gametic == gametic)
     {
@@ -194,7 +194,7 @@ void I_Read(int fd, void* vbuf, size_t sz)
   unsigned char* buf = (unsigned char*)vbuf;
 
   while (sz) {
-    int rc = read(fd,buf,sz);
+    int rc = read(fd,buf,(unsigned int)sz);
     if (rc <= 0) {
       I_Error("I_Read: read failed: %s", rc ? strerror(errno) : "EOF");
     }
@@ -650,6 +650,7 @@ char* I_RequireAnyFile(const char* wfname, const char** ext)
   }
 
   I_Error("Unable to find required file \"%s\"", wfname);
+  return NULL;
 }
 
 char* I_RequireWad(const char* wfname)
