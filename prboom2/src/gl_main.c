@@ -761,25 +761,17 @@ void gld_DrawLine(int x0, int y0, int x1, int y1, int BaseColor)
 
 static dboolean fuzz_overlap; // [PN] fuzz silhouettes left stencil counts
 static int fuzz_sprites;      // [PN] fuzz silhouettes in this frame
-// [PN] Set when gld_StartFuzz() has bound the scene snapshot to texture unit 2.
-// gld_EndFuzz() then restores the previous unit 2 texture (the colormap).
-// If no snapshot was taken (e.g. for the HUD weapon), unit 2 was never touched.
-static dboolean fuzz_scene_bound;
 
-void gld_StartFuzz(int sprite, float ratio, dboolean melt)
+void gld_StartFuzz(int sprite, float ratio)
 {
   color_rgb_t color;
-  dboolean smear = false;
+  dboolean smear;
 
   // [PN] Mirrors the cell the shader uses for smear sampling.
   const int cell = ratio > 0.0f ? (int)ratio : MAX(1, MIN(SCREENWIDTH, SCREENHEIGHT) / 200);
 
   // [PN] Copy the scene so the shader can smear the background behind the fuzz.
-  if (melt)
-  {
-    smear = gld_BindFuzzScene(cell);
-    fuzz_scene_bound = true;
-  }
+  smear = gld_BindFuzzScene(cell);
 
   // shader init
   glsl_PushFuzzShader(gametic, sprite, ratio, smear);
@@ -814,12 +806,7 @@ void gld_EndFuzz()
 {
   glsl_PopFuzzShader();
   glEnable(GL_BLEND);
-
-  if (fuzz_scene_bound)
-  {
-    gld_UnbindFuzzScene();
-    fuzz_scene_bound = false;
-  }
+  gld_UnbindFuzzScene();
 
   if (fuzz_overlap)
   {
@@ -868,7 +855,7 @@ void gld_DrawWeapon(int weaponlump, vissprite_t *vis, int lightlevel)
   // when invisibility is about to go
   if (/*(viewplayer->mo->flags & MF_SHADOW) && */!vis->colormap)
   {
-    gld_StartFuzz(-1, 0, true);
+    gld_StartFuzz(-1, 0);
   }
   else
   {
@@ -2097,7 +2084,7 @@ static void gld_DrawSprite(GLSprite *sprite)
       glGetIntegerv(GL_BLEND_SRC, &blend_src);
       glGetIntegerv(GL_BLEND_DST, &blend_dst);
       restore = 1;
-      gld_StartFuzz(sprite->id, ratio, true);
+      gld_StartFuzz(sprite->id, ratio);
     }
     else
     {
