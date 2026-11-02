@@ -34,6 +34,7 @@
 #include "dsda/music.h"
 #include "dsda/options.h"
 #include "dsda/settings.h"
+#include "dsda/skill_info.h"
 
 #include "hexen/sv_save.h"
 
@@ -144,6 +145,30 @@ static void dsda_UnArchiveContext(void) {
   true_basetic = gametic - true_logictic_value;
 }
 
+skill_info_t saved_custom_skill;
+
+static void dsda_ArchiveCustomSkill(void)
+{
+  // don't store info if normal skill
+  if (gameskill != (num_skills - 1))
+    return;
+
+  saved_custom_skill = skill_infos[num_skills - 1];  // custom skill (-1 to match gameskill)
+
+  P_SAVE_X(saved_custom_skill);
+}
+
+static void dsda_UnArchiveCustomSkill(void)
+{
+  // don't store info if normal skill
+  if (gameskill != (num_skills - 1))
+    return;
+
+  P_LOAD_X(saved_custom_skill);
+
+  skill_infos[num_skills - 1] = saved_custom_skill;  // custom skill (-1 to match gameskill)
+}
+
 static int saved_pistolstart;
 static int saved_respawnparm;
 static int saved_fastparm;
@@ -230,6 +255,7 @@ void dsda_ArchiveAll(void) {
 
   dsda_ArchiveHexenStats();
   dsda_ArchiveGameModifiers();
+  dsda_ArchiveCustomSkill();
   dsda_ArchiveInternal();
 }
 
@@ -252,6 +278,7 @@ void dsda_UnArchiveAll(void) {
 
   dsda_UnArchiveHexenStats();
   dsda_UnArchiveGameModifiers();
+  dsda_UnArchiveCustomSkill();
   dsda_UnArchiveInternal();
 }
 

@@ -145,6 +145,7 @@ typedef struct setup_menu_s
   int input; // composite input identifier
   const char **selectstrings; /* list of strings for choice value */
   struct setup_menu_s *menu;  /* next or prev menu */
+  void (*action)(void); // killough 10/98: function to call after changing
 } setup_menu_t;
 
 //
@@ -175,7 +176,7 @@ typedef struct
 } menuitem_t;
 
 #define MENUF_TEXTINPUT 0x01
-#define MENUF_OPTLUMP   0x02 // [Nugget] Optional graphic lump
+#define MENUF_OPTLUMP   0x02    // make graphic lump optional
 
 typedef struct menu_s
 {

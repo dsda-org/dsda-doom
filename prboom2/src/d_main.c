@@ -2103,6 +2103,9 @@ static void D_DoomMainSetup(void)
 
   G_ReloadDefaults();
 
+  // Check for custom skill
+  dsda_CheckCustomSkill();
+
   // e6y
   // option to disable automatic loading of dehacked-in-wad lump
   if (!dsda_Flag(dsda_arg_nodeh))
