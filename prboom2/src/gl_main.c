@@ -783,7 +783,7 @@ void gld_StartFuzz(int sprite, float ratio)
 
   // [PN] Count overlapping silhouettes in the stencil; gld_EndDrawScene turns
   // counts >= 2 into the extra darkening layers the shared snapshot cannot add.
-  if (smear && sprite >= 0 && fuzz_sprites >= 2)
+  if (smear && fuzz_sprites >= 2)
   {
     glEnable(GL_STENCIL_TEST);
     glStencilFunc(GL_ALWAYS, 0, 0xFF);
