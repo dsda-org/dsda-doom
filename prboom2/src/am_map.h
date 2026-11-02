@@ -191,4 +191,17 @@ extern map_trail_mode_t map_trail_mode;
 void AM_updatePlayerTrail(fixed_t x, fixed_t y);
 void AM_RefreshMinimap(void);
 
+typedef struct
+{
+  fixed_t x1, y1, x2, y2;
+  int when;
+} amlinetrace_t;
+
+#define MAXAMLINETRACES 64
+extern amlinetrace_t amlinetraces[MAXAMLINETRACES];
+extern unsigned int start_amlinetrace;
+extern unsigned int num_amlinetrace;
+
+amlinetrace_t *AM_addLineTrace();
+
 #endif
