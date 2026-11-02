@@ -761,17 +761,25 @@ void gld_DrawLine(int x0, int y0, int x1, int y1, int BaseColor)
 
 static dboolean fuzz_overlap; // [PN] fuzz silhouettes left stencil counts
 static int fuzz_sprites;      // [PN] fuzz silhouettes in this frame
+// [PN] Set when gld_StartFuzz() has bound the scene snapshot to texture unit 2.
+// gld_EndFuzz() then restores the previous unit 2 texture (the colormap).
+// If no snapshot was taken (e.g. for the HUD weapon), unit 2 was never touched.
+static dboolean fuzz_scene_bound;
 
-void gld_StartFuzz(int sprite, float ratio)
+void gld_StartFuzz(int sprite, float ratio, dboolean melt)
 {
   color_rgb_t color;
-  dboolean smear;
+  dboolean smear = false;
 
   // [PN] Mirrors the cell the shader uses for smear sampling.
   const int cell = ratio > 0.0f ? (int)ratio : MAX(1, MIN(SCREENWIDTH, SCREENHEIGHT) / 200);
 
   // [PN] Copy the scene so the shader can smear the background behind the fuzz.
-  smear = gld_BindFuzzScene(cell);
+  if (melt)
+  {
+    smear = gld_BindFuzzScene(cell);
+    fuzz_scene_bound = true;
+  }
 
   // shader init
   glsl_PushFuzzShader(gametic, sprite, ratio, smear);
@@ -783,7 +791,8 @@ void gld_StartFuzz(int sprite, float ratio)
 
   // [PN] Count overlapping silhouettes in the stencil; gld_EndDrawScene turns
   // counts >= 2 into the extra darkening layers the shared snapshot cannot add.
-  if (smear && fuzz_sprites >= 2)
+  // -1 is a HUD weapon.
+  if (smear && sprite != -1 && fuzz_sprites >= 2)
   {
     glEnable(GL_STENCIL_TEST);
     glStencilFunc(GL_ALWAYS, 0, 0xFF);
@@ -805,7 +814,12 @@ void gld_EndFuzz()
 {
   glsl_PopFuzzShader();
   glEnable(GL_BLEND);
-  gld_UnbindFuzzScene();
+
+  if (fuzz_scene_bound)
+  {
+    gld_UnbindFuzzScene();
+    fuzz_scene_bound = false;
+  }
 
   if (fuzz_overlap)
   {
@@ -854,7 +868,7 @@ void gld_DrawWeapon(int weaponlump, vissprite_t *vis, int lightlevel)
   // when invisibility is about to go
   if (/*(viewplayer->mo->flags & MF_SHADOW) && */!vis->colormap)
   {
-    gld_StartFuzz(-1, 0);
+    gld_StartFuzz(-1, 0, true);
   }
   else
   {
@@ -1167,6 +1181,10 @@ void gld_EndDrawScene(void)
 
     fuzz_overlap = false;
   }
+
+  // [PN] The HUD weapon is drawn after the world, so refresh the snapshot:
+  // otherwise it would melt with the world copy taken at the first fuzz sprite
+  gld_RefreshFuzzScene();
 
   glsl_PushMainShader();
   R_DrawPlayerSprites();
@@ -2079,7 +2097,7 @@ static void gld_DrawSprite(GLSprite *sprite)
       glGetIntegerv(GL_BLEND_SRC, &blend_src);
       glGetIntegerv(GL_BLEND_DST, &blend_dst);
       restore = 1;
-      gld_StartFuzz(sprite->id, ratio);
+      gld_StartFuzz(sprite->id, ratio, true);
     }
     else
     {

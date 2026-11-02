@@ -1450,6 +1450,11 @@ dboolean gld_BindFuzzScene(int cell)
   return fuzzscene_ok;
 }
 
+void gld_RefreshFuzzScene(void)
+{
+  fuzzscene_frame = -1;
+}
+
 void gld_UnbindFuzzScene(void)
 {
   GLEXT_glActiveTextureARB(GL_TEXTURE2_ARB);
