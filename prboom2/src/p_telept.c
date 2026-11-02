@@ -792,7 +792,7 @@ dboolean EV_HexenTeleport(int tid, mobj_t * thing, dboolean fog)
         return false;
     }
     count = 0;
-    while (P_FindMobjFromTID(tid, mo, NULL) != NULL)
+    while ((mo = P_FindMobjFromTID(tid, mo, NULL)) != NULL)
     {
         count++;
     }

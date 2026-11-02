@@ -6509,7 +6509,7 @@ static void DragonSeek(mobj_t * actor, angle_t thresh, angle_t turnMax)
                 {
                     continue;
                 }
-                mo = P_FindMobjFromTID(target->special_args[i], mo, NULL);
+                mo = P_FindMobjFromTID(target->special_args[i], NULL, NULL);
                 // [crispy] fix wyvern + porkalator bug
                 if (mo == NULL)
                 {
@@ -6555,16 +6555,16 @@ static void DragonSeek(mobj_t * actor, angle_t thresh, angle_t turnMax)
 
 void A_DragonInitFlight(mobj_t * actor)
 {
-    int search;
+    mobj_t *rover = NULL;
 
-    search = -1;
     do
     {                           // find the first tid identical to the dragon's tid
         P_SetTarget(
           &actor->special1.m,
-          P_FindMobjFromTID(actor->tid, NULL, NULL)
+          P_FindMobjFromTID(actor->tid, rover, NULL)
         );
-        if (search == -1)
+        rover = actor->special1.m;
+        if (!rover)
         {
             P_SetMobjState(actor, actor->info->spawnstate);
             return;
@@ -8329,7 +8329,7 @@ void A_KoraxChase(mobj_t * actor)
         {
             lastfound = actor->special1.m;
             spot = P_FindMobjFromTID(KORAX_TELEPORT_TID, lastfound, NULL);
-            actor->special1.m = lastfound;
+            P_SetTarget(&actor->special1.m, spot);
             if (spot)
             {
                 P_Teleport(actor, spot->x, spot->y, spot->angle, true);

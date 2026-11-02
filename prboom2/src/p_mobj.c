@@ -1562,7 +1562,7 @@ dboolean P_SpawnProjectile(short thing_id, mobj_t *source, int spawn_num, angle_
 
   while ((spawn_location = P_FindMobjFromTID(thing_id, spawn_location, source)))
   {
-    destination = P_FindMobjFromTID(dest_id, destination, forcedest);
+    destination = P_FindMobjFromTID(dest_id, NULL, forcedest);
 
     if (!dest_id || destination)
     {
@@ -3942,7 +3942,9 @@ void P_CreateTIDList(void)
 {
     mobj_t *mobj = NULL;
 
-    for (thinker_t *t = thinkercap.next; t != &thinkercap; t = t->next)
+    P_InitTIDHash();
+
+    for (thinker_t *t = thinkercap.prev; t != &thinkercap; t = t->prev)
     {
         // Search all current thinkers
         if (t->function != P_MobjThinker)
