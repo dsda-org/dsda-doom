@@ -855,7 +855,10 @@ void gld_DrawWeapon(int weaponlump, vissprite_t *vis, int lightlevel)
   // when invisibility is about to go
   if (/*(viewplayer->mo->flags & MF_SHADOW) && */!vis->colormap)
   {
-    gld_StartFuzz(-1, 0);
+    // [PN] Use screen-space fuzz cells for the weapon as well: texture-space
+    // cells made the fuzz lookup disagree with the scene copy's cell grid and
+    // could leave one-pixel seams in the melting.
+    gld_StartFuzz(-1, (float)MAX(1, MIN(SCREENWIDTH, SCREENHEIGHT) / 200));
   }
   else
   {
