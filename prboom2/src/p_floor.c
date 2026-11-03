@@ -371,8 +371,7 @@ void T_MoveHexenFloor(floormove_t * floor)
         {
             return;
         }
-        // [AR] Hexen uses specialdata for floor and ceiling
-        // So we must also clear ceilingdata
+        // [AR] Hexen clears both floor and ceiling
         floor->sector->floordata = NULL;
         floor->sector->ceilingdata = NULL;
         if (floor->textureChange)
@@ -1455,6 +1454,7 @@ int Hexen_EV_DoFloor(line_t * line, byte * args, floor_e floortype)
         memset(floor, 0, sizeof(*floor));
         P_AddThinker(&floor->thinker);
         sec->floordata = floor;
+        sec->ceilingdata = NULL;
         floor->thinker.function = T_MoveFloor;
         floor->type = floortype;
         floor->crush = NO_CRUSH;
@@ -1651,6 +1651,7 @@ static void ProcessStairSector(sector_t * sec, int type, int height,
     memset(floor, 0, sizeof(*floor));
     P_AddThinker(&floor->thinker);
     sec->floordata = floor;
+    sec->ceilingdata = NULL;
     floor->thinker.function = T_MoveFloor;
     floor->type = FLEV_RAISEBUILDSTEP;
     floor->direction = Direction;
@@ -1980,7 +1981,9 @@ void T_BuildHexenPillar(pillar_t * pillar)
                               pillar->crush, -pillar->direction, true);
     if (res1 == pastdest && res2 == pastdest)
     {
+        // [AR] Hexen clears both floor and ceiling
         pillar->sector->floordata = NULL;
+        pillar->sector->ceilingdata = NULL;
         SN_StopSequence((mobj_t *) & pillar->sector->soundorg);
         P_TagFinished(pillar->sector->tag);
         P_RemoveThinker(&pillar->thinker);
@@ -2159,6 +2162,7 @@ int EV_BuildPillar(line_t * line, byte * args, int crush)
         pillar = Z_MallocLevel(sizeof(*pillar));
         memset(pillar, 0, sizeof(*pillar));
         sec->floordata = pillar;
+        sec->ceilingdata = NULL;
         P_AddThinker(&pillar->thinker);
         pillar->thinker.function = T_BuildPillar;
         pillar->sector = sec;
@@ -2215,6 +2219,7 @@ int EV_OpenPillar(line_t * line, byte * args)
         pillar = Z_MallocLevel(sizeof(*pillar));
         memset(pillar, 0, sizeof(*pillar));
         sec->floordata = pillar;
+        sec->ceilingdata = NULL;
         P_AddThinker(&pillar->thinker);
         pillar->thinker.function = T_BuildPillar;
         pillar->sector = sec;
@@ -2320,7 +2325,9 @@ int EV_FloorCrushStop(line_t * line, byte * args)
         }
         // Completely remove the crushing floor
         SN_StopSequence((mobj_t *) & floor->sector->soundorg);
+        // [AR] Hexen clears both floor and ceiling
         floor->sector->floordata = NULL;
+        floor->sector->ceilingdata = NULL;
         P_TagFinished(floor->sector->tag);
         P_RemoveThinker(&floor->thinker);
         rtn = 1;
@@ -2351,6 +2358,12 @@ static void T_PlaneWaggle(planeWaggle_t * waggle, fixed_t * planeheight, void **
         (*planeheight) = waggle->originalHeight;
         P_ChangeSector(waggle->sector, true);
         (*planedata) = NULL;
+        // [AR] Hexen clears both floor and ceiling
+        if (hexen && !map_format.zdoom)
+        {
+          waggle->sector->floordata = NULL;
+          waggle->sector->ceilingdata = NULL;
+        }
         P_TagFinished(waggle->sector->tag);
         P_RemoveThinker(&waggle->thinker);
         return;
@@ -2392,12 +2405,16 @@ static void P_SpawnPlaneWaggle(sector_t *sector, int height, int speed,
   if (ceiling)
   {
     sector->ceilingdata = waggle;
+    if (hexen && !map_format.zdoom)
+      sector->floordata = NULL;
     waggle->thinker.function = T_CeilingWaggle;
     waggle->originalHeight = sector->ceilingheight;
   }
   else
   {
     sector->floordata = waggle;
+    if (hexen && !map_format.zdoom)
+      sector->ceilingdata = NULL;
     waggle->thinker.function = T_FloorWaggle;
     waggle->originalHeight = sector->floorheight;
   }

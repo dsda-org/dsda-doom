@@ -680,11 +680,10 @@ void P_AddActiveCeiling(ceiling_t* ceiling)
 void P_RemoveActiveCeiling(ceiling_t* ceiling)
 {
   ceilinglist_t *list = ceiling->list;
-  ceiling->sector->ceilingdata = NULL;  //jff 2/22/98
-  // [AR] Hexen uses specialdata for floor and ceiling
-  // So we must also clear ceilingdata
-  if (hexen)
+  // [AR] Hexen clears both floor and ceiling
+  if (hexen && !map_format.zdoom)
     ceiling->sector->floordata = NULL;
+  ceiling->sector->ceilingdata = NULL;  //jff 2/22/98
   P_RemoveThinker(&ceiling->thinker);
   P_TagFinished(ceiling->sector->tag);
   if ((*list->prev = list->next))
@@ -1013,6 +1012,7 @@ int Hexen_EV_DoCeiling(line_t * line, byte * arg, ceiling_e type)
         ceiling = Z_MallocLevel(sizeof(*ceiling));
         memset(ceiling, 0, sizeof(*ceiling));
         P_AddThinker(&ceiling->thinker);
+        sec->floordata = NULL;
         sec->ceilingdata = ceiling;
         ceiling->thinker.function = T_MoveCeiling;
         ceiling->sector = sec;
