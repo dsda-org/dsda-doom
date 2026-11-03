@@ -3171,6 +3171,8 @@ static const char *demos_pages[] =
   NULL
 };
 
+static const char *gl_health_bar_list[] = { "No", "Bar", "Number", "Bar + number", NULL };
+
 setup_menu_t demos_options_settings[];
 setup_menu_t demos_tas_settings[];
 
@@ -3209,6 +3211,7 @@ setup_menu_t demos_tas_settings[] =
   { "Command History", S_NUM, m_conf, DM_X, dsda_config_command_history_size },
   { "Hide Empty Commands", S_YESNO, m_conf, DM_X, dsda_config_hide_empty_commands },
   { "Show Coordinate Display", S_YESNO, m_conf, DM_X, dsda_config_coordinate_display },
+  { "OpenGL Show Health Bars", S_CHOICE, m_conf, DM_X, dsda_config_gl_health_bar, 0, gl_health_bar_list },
   EMPTY_LINE,
   { "Permanent Strafe50", S_YESNO, m_conf, DM_X, dsda_config_movement_strafe50 },
   { "Strafe50 On Turns", S_YESNO, m_conf, DM_X, dsda_config_movement_strafe50onturns },
@@ -3715,7 +3718,6 @@ setup_menu_t display_options_settings[] = {
   { "Fix Shallow Floor View Bob Jolt", S_YESNO, m_conf, G_X, dsda_config_fix_viewbob_floor_jolt },
   { "Linear Sky Scrolling", S_YESNO, m_conf, G_X, dsda_config_render_linearsky },
   { "Quake Intensity", S_NUM, m_conf, G_X, dsda_config_quake_intensity },
-  { "OpenGL Show Health Bars", S_YESNO, m_conf, G_X, dsda_config_gl_health_bar },
   { "Translucent Sprites", S_CHOICE, m_conf, G_X, dsda_config_translucent_sprites, 0, translucent_list },
   { "Translucent Ghosts", S_YESNO, m_conf, G_X, dsda_config_translucent_ghosts },
   EMPTY_LINE,

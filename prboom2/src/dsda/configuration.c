@@ -635,7 +635,7 @@ dsda_config_t dsda_config[dsda_config_count] = {
   },
   [dsda_config_gl_health_bar] = {
     "gl_health_bar", dsda_config_gl_health_bar,
-    CONF_BOOL(0), NULL, STRICT_INT(0)
+    dsda_config_int, 0, 3, { 0 }, NULL, STRICT_RANGE(0, 3)
   },
   [dsda_config_gl_usevbo] = {
     "gl_usevbo", dsda_config_gl_usevbo,
