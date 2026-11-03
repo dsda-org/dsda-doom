@@ -2131,7 +2131,7 @@ static void gld_HealthNums_DrawChar(float x1, float y, float z1, char c,
   GLTexture *gltexture;
   float width, height;
   const float div = 2/(3*MAP_COEFF);
-  const int lump = exhud_font.font[c-'!'].lumpnum;
+  const int lump = exhud_font.font[c - exhud_font.start].lumpnum;
 
   gltexture = gld_RegisterPatch(lump, cm, false, V_IsUILightmodeIndexed());
   gld_BindPatch(gltexture, cm);
@@ -2501,8 +2501,11 @@ void gld_ProjectSprite(mobj_t* thing, int lightlevel)
   {
     // if too far away, no point in rendering numbers
     const dboolean num_readable = tz < FRACUNIT * 800;
-    if (dsda_ShowHealthBars() || (dsda_ShowHealthNums() && num_readable))
+    if ((dsda_ShowHealthBars()&1) ||
+      ((dsda_ShowHealthBars()&2) && num_readable))
+    {
       gld_AddHealthBar(thing, &sprite, num_readable);
+    }
   }
 }
 
@@ -2801,8 +2804,9 @@ void gld_DrawScene(player_t *player)
   }
 
   {
-    const int hbar = dsda_ShowHealthBars(), hnum = dsda_ShowHealthNums();
-    if (hbar || hnum) {
+    const int hbar = dsda_ShowHealthBars() & 1;
+    const int hnum = dsda_ShowHealthBars() & 2;
+    if (hbar | hnum) {
       glsl_PushNullShader();
       if (hbar) gld_DrawHealthBars();
       if (hnum) gld_DrawHealthNums();
