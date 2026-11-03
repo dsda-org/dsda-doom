@@ -1499,7 +1499,7 @@ static void UnarchiveMobjs(void)
         P_AddThinker(&mobj->thinker);
         mobj->thinker.references = references;
     }
-    map_format.build_mobj_thing_id_list();
+    P_CreateTIDList();
     P_InitCreatureCorpseQueue(true);    // true = scan for corpses
 }
 

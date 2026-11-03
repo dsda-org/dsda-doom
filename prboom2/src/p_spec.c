@@ -41,6 +41,7 @@
 
 #include "doomstat.h"
 #include "p_spec.h"
+#include "p_mobj.h"
 #include "p_tick.h"
 #include "p_setup.h"
 #include "m_random.h"
@@ -73,7 +74,6 @@
 #include "dsda/mapinfo.h"
 #include "dsda/messenger.h"
 #include "dsda/scroll.h"
-#include "dsda/thing_id.h"
 #include "dsda/utility.h"
 
 //
@@ -4603,7 +4603,7 @@ static void CalculatePushVector(line_t *l, int magnitude, int angle, fixed_t *dx
 void P_SpawnZDoomPusher(line_t *l)
 {
   const int *id_p;
-  mobj_t* thing;
+  mobj_t* thing = NULL;
   fixed_t dx, dy;
 
   switch (l->special)
@@ -4637,10 +4637,8 @@ void P_SpawnZDoomPusher(line_t *l)
       }
       else
       {  // [RH] Find thing by tid
-        thing_id_search_t search;
 
-        dsda_ResetThingIDSearch(&search);
-        while ((thing = dsda_FindMobjFromThingID(l->special_args[1], &search)) != NULL)
+        while ((thing = P_FindMobjFromTID(l->special_args[1], thing, NULL)))
           if (thing->type == map_format.mt_push || thing->type == map_format.mt_pull)
             Add_Pusher(p_push, dx, dy, thing, thing->subsector->sector->iSectorID);
       }
@@ -7125,11 +7123,9 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
       break;
     case zl_polyobj_move_to_spot:
       {
-        mobj_t *dest;
-        thing_id_search_t search;
+        mobj_t *dest = NULL;
 
-        dsda_ResetThingIDSearch(&search);
-        dest = dsda_FindMobjFromThingID(args[2], &search);
+        dest = P_FindMobjFromTID(args[2], dest, NULL);
 
         if (!dest)
         {
@@ -7142,11 +7138,9 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
       break;
     case zl_polyobj_or_move_to_spot:
       {
-        mobj_t *dest;
-        thing_id_search_t search;
+        mobj_t *dest = NULL;
 
-        dsda_ResetThingIDSearch(&search);
-        dest = dsda_FindMobjFromThingID(args[2], &search);
+        dest = P_FindMobjFromTID(args[2], dest, NULL);
 
         if (!dest)
         {
@@ -7162,13 +7156,11 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
       break;
     case zl_radius_quake:
       {
-        mobj_t *spawn_location;
-        thing_id_search_t search;
+        mobj_t *spawn_location = NULL;
 
         args[0] = BETWEEN(1, 9, args[0]);
 
-        dsda_ResetThingIDSearch(&search);
-        while ((spawn_location = dsda_FindMobjFromThingIDOrMobj(args[4], mo, &search)))
+        while ((spawn_location = P_FindMobjFromTID(args[4], spawn_location, mo)))
         {
           dsda_SpawnQuake(spawn_location, args[0], args[1], args[2], args[3]);
           buttonSuccess = 1;
@@ -7177,14 +7169,11 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
       break;
     case zl_thing_move:
       {
-        mobj_t *target;
-        mobj_t *dest;
-        thing_id_search_t search;
+        mobj_t *target = NULL;
+        mobj_t *dest = NULL;
 
-        dsda_ResetThingIDSearch(&search);
-        target = dsda_FindMobjFromThingIDOrMobj(args[0], mo, &search);
-        dsda_ResetThingIDSearch(&search);
-        dest = dsda_FindMobjFromThingID(args[1], &search);
+        target = P_FindMobjFromTID(args[0], target, mo);
+        dest = P_FindMobjFromTID(args[1], dest, NULL);
 
         if (target && dest)
         {
@@ -7195,11 +7184,9 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
     case zl_teleport_other:
       if (args[0] && args[1])
       {
-        mobj_t *target;
-        thing_id_search_t search;
+        mobj_t *target = NULL;
 
-        dsda_ResetThingIDSearch(&search);
-        while ((target = dsda_FindMobjFromThingID(args[0], &search)))
+        while ((target = P_FindMobjFromTID(args[0], target, NULL)))
         {
           buttonSuccess |= map_format.ev_teleport(args[1], 0, NULL, 0, target,
                                                   args[2] ? (TELF_DESTFOG | TELF_SOURCEFOG) :
@@ -7323,11 +7310,9 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
       break;
     case zl_thing_set_special:
       {
-        mobj_t *target;
-        thing_id_search_t search;
+        mobj_t *target = NULL;
 
-        dsda_ResetThingIDSearch(&search);
-        while ((target = dsda_FindMobjFromThingIDOrMobj(args[0], mo, &search)))
+        while ((target = P_FindMobjFromTID(args[0], target, mo)))
         {
           target->special = args[1];
           target->special_args[0] = args[2];
@@ -7376,11 +7361,9 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
       break;
     case zl_thing_stop:
       {
-        mobj_t *target;
-        thing_id_search_t search;
+        mobj_t *target = NULL;
 
-        dsda_ResetThingIDSearch(&search);
-        while ((target = dsda_FindMobjFromThingIDOrMobj(args[0], mo, &search)))
+        while ((target = P_FindMobjFromTID(args[0], target, mo)))
         {
           buttonSuccess = 1;
 
@@ -7398,26 +7381,22 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
       break;
     case zl_thing_change_tid:
       {
-        mobj_t *target;
-        thing_id_search_t search;
+        mobj_t *target = NULL;
 
-        dsda_ResetThingIDSearch(&search);
-        while ((target = dsda_FindMobjFromThingIDOrMobj(args[0], mo, &search)))
+        while ((target = P_FindMobjFromTID(args[0], target, mo)))
         {
-          dsda_RemoveMobjThingID(target);
+          P_RemoveThingTID(target);
           target->tid = args[1];
           if (target->tid)
-            dsda_AddMobjThingID(target, args[1]);
+            P_AddThingTID(target, args[1]);
         }
       }
       buttonSuccess = 1;
       break;
     case zl_thing_hate:
       {
-        mobj_t *hater;
-        mobj_t *target;
-        thing_id_search_t search;
-        thing_id_search_t target_search;
+        mobj_t *hater = NULL;
+        mobj_t *target = NULL;
 
         // Currently no support for this arg
         if (args[2])
@@ -7432,8 +7411,7 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
 
         buttonSuccess = 1;
 
-        dsda_ResetThingIDSearch(&target_search);
-        while ((target = dsda_FindMobjFromThingIDOrMobj(args[1], mo, &target_search)))
+        while ((target = P_FindMobjFromTID(args[1], target, mo)))
         {
           if (
             target->flags & MF_SHOOTABLE &&
@@ -7450,8 +7428,7 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
           break;
         }
 
-        dsda_ResetThingIDSearch(&search);
-        while ((hater = dsda_FindMobjFromThingIDOrMobj(args[0], mo, &search)))
+        while ((hater = P_FindMobjFromTID(args[0], hater, mo)))
         {
           if (
             hater->health > 0 &&
@@ -7459,7 +7436,7 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
             hater->info->seestate
           )
           {
-            while ((target = dsda_FindMobjFromThingIDOrMobj(args[1], mo, &target_search)))
+            while ((target = P_FindMobjFromTID(args[1], target, mo)))
             {
               if (
                 target->flags & MF_SHOOTABLE &&
@@ -7475,8 +7452,7 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
             // Restart from beginning of list
             if (!target)
             {
-              dsda_ResetThingIDSearch(&target_search);
-              while ((target = dsda_FindMobjFromThingIDOrMobj(args[1], mo, &target_search)))
+              while ((target = P_FindMobjFromTID(args[1], target, mo)))
               {
                 if (
                   target->flags & MF_SHOOTABLE &&
@@ -7507,11 +7483,9 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
       break;
     case zl_thing_remove:
       {
-        mobj_t *target;
-        thing_id_search_t search;
+        mobj_t *target = NULL;
 
-        dsda_ResetThingIDSearch(&search);
-        while ((target = dsda_FindMobjFromThingIDOrMobj(args[0], mo, &search)))
+        while ((target = P_FindMobjFromTID(args[0], target, mo)))
         {
           if (!target->player)
           {
@@ -7526,11 +7500,9 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
       break;
     case zl_thing_activate:
       {
-        mobj_t *target;
-        thing_id_search_t search;
+        mobj_t *target = NULL;
 
-        dsda_ResetThingIDSearch(&search);
-        while ((target = dsda_FindMobjFromThingIDOrMobj(args[0], mo, &search)))
+        while ((target = P_FindMobjFromTID(args[0], target, mo)))
         {
           if (target->flags2 & MF2_DORMANT)
           {
@@ -7544,11 +7516,9 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
       break;
     case zl_thing_deactivate:
       {
-        mobj_t *target;
-        thing_id_search_t search;
+        mobj_t *target = NULL;
 
-        dsda_ResetThingIDSearch(&search);
-        while ((target = dsda_FindMobjFromThingIDOrMobj(args[0], mo, &search)))
+        while ((target = P_FindMobjFromTID(args[0], target, mo)))
         {
           if (!(target->flags2 & MF2_DORMANT))
           {
@@ -7563,13 +7533,11 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
     case zl_thrust_thing:
       {
         fixed_t thrust;
-        mobj_t *target;
-        thing_id_search_t search;
+        mobj_t *target = NULL;
 
         thrust = args[1] * FRACUNIT;
 
-        dsda_ResetThingIDSearch(&search);
-        while ((target = dsda_FindMobjFromThingIDOrMobj(args[3], mo, &search)))
+        while ((target = P_FindMobjFromTID(args[3], target, mo)))
         {
           P_ThrustMobj(target, P_ArgToAngle(args[0]), thrust);
         }
@@ -7580,16 +7548,14 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
     case zl_thrust_thing_z:
       {
         fixed_t thrust;
-        mobj_t *target;
-        thing_id_search_t search;
+        mobj_t *target = NULL;
 
         thrust = args[1] * FRACUNIT / 4;
 
         if (args[2])
           thrust = -thrust;
 
-        dsda_ResetThingIDSearch(&search);
-        while ((target = dsda_FindMobjFromThingIDOrMobj(args[0], mo, &search)))
+        while ((target = P_FindMobjFromTID(args[0], target, mo)))
         {
           if (!args[3])
             target->momz = thrust;
@@ -7602,11 +7568,9 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
       break;
     case zl_thing_raise:
       {
-        mobj_t *target;
-        thing_id_search_t search;
+        mobj_t *target = NULL;
 
-        dsda_ResetThingIDSearch(&search);
-        while ((target = dsda_FindMobjFromThingIDOrMobj(args[0], mo, &search)))
+        while ((target = P_FindMobjFromTID(args[0], target, mo)))
         {
           buttonSuccess |= P_RaiseThing(target, NULL);
         }
@@ -7628,11 +7592,9 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
       break;
     case zl_thing_damage:
       {
-        mobj_t *target;
-        thing_id_search_t search;
+        mobj_t *target = NULL;
 
-        dsda_ResetThingIDSearch(&search);
-        while ((target = dsda_FindMobjFromThingIDOrMobj(args[0], mo, &search)))
+        while ((target = P_FindMobjFromTID(args[0], target, mo)))
         {
           if (target->flags & MF_SHOOTABLE)
           {
@@ -7679,11 +7641,9 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
       }
       else
       {
-        mobj_t *target;
-        thing_id_search_t search;
+        mobj_t *target = NULL;
 
-        dsda_ResetThingIDSearch(&search);
-        while ((target = dsda_FindMobjFromThingID(args[0], &search)))
+        while ((target = P_FindMobjFromTID(args[0], target, NULL)))
         {
           if (
             target->flags & MF_SHOOTABLE &&

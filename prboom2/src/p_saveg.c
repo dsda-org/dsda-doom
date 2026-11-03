@@ -1747,7 +1747,7 @@ void P_UnArchiveThinkers(void) {
   // TODO: not in sync, need to save and load existing order
   if (map_format.thing_id)
   {
-    map_format.build_mobj_thing_id_list();
+    P_CreateTIDList();
   }
 
   if (hexen)

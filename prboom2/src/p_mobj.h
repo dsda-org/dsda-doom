@@ -413,6 +413,12 @@ typedef struct mobj_s
     byte color;
     const byte* tranmap;
 
+    // Note: tid chain pointers are NOT serialized in save games,
+    // but are restored on load by rehashing the things as they are
+    // spawned.
+    struct mobj_s  *tid_next;  // ptr to next thing in tid chain
+    struct mobj_s **tid_prevn; // ptr to last thing's next pointer
+
     // SEE WARNING ABOVE ABOUT POINTER FIELDS!!!
 } mobj_t;
 
@@ -566,7 +572,6 @@ mobj_t *P_SPMAngleXYZ(mobj_t * source, fixed_t x, fixed_t y,
                       fixed_t z, mobjtype_t type, angle_t angle);
 mobj_t *P_SpawnKoraxMissile(fixed_t x, fixed_t y, fixed_t z,
                             mobj_t * source, mobj_t * dest, mobjtype_t type);
-mobj_t *P_FindMobjFromTID(short tid, int *searchPosition);
 void P_BloodSplatter2(fixed_t x, fixed_t y, fixed_t z, mobj_t * originator);
 
 // zdoom
@@ -577,5 +582,12 @@ dboolean P_SpawnThing(short thing_id, mobj_t *source, int type,
 dboolean P_SpawnProjectile(short thing_id, mobj_t *source, int spawn_num, angle_t angle,
 	                         fixed_t speed, fixed_t vspeed, short dest_id, mobj_t *forcedest,
                            int gravity, short new_thing_id);
+
+// TIDs
+void P_InitTIDHash(void);
+void P_AddThingTID(mobj_t *mo, int tid);
+void P_RemoveThingTID(mobj_t *mo);
+mobj_t *P_FindMobjFromTID(int tid, mobj_t *rover, mobj_t *trigger);
+void P_CreateTIDList(void);
 
 #endif
