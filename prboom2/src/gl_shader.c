@@ -648,7 +648,7 @@ void glsl_SetLightLevel(float lightlevel)
   glsl_ShaderUniform(sh_main, MAIN_UNIF_LIGHTLEVEL, lightlevel);
 }
 
-void glsl_PushFuzzShader(int tic, int sprite, float ratio, dboolean smear)
+static double glsl_FuzzSeed(int tic, int sprite)
 {
   // Large integers converted to float can lose precision, causing
   // problems in the shader.  Since the tic and sprite count are just
@@ -661,9 +661,19 @@ void glsl_PushFuzzShader(int tic, int sprite, float ratio, dboolean smear)
   seed = seed * factor + sprite;
   seed *= factor;
 
+  return (double) seed / INT_MAX;
+}
+
+void glsl_SetFuzzSeed(int tic, int sprite)
+{
+  glsl_ShaderUniform(sh_fuzz, FUZZ_UNIF_SEED, glsl_FuzzSeed(tic, sprite));
+}
+
+void glsl_PushFuzzShader(int tic, int sprite, float ratio, dboolean smear)
+{
   glsl_ShaderPush(sh_fuzz,
              FUZZ_UNIF_RATIO, ratio,
-             FUZZ_UNIF_SEED, (double) seed / INT_MAX,
+             FUZZ_UNIF_SEED, glsl_FuzzSeed(tic, sprite),
              FUZZ_UNIF_SCENE_D,
              smear ? (double)SCREENWIDTH : 0.0,
              smear ? (double)SCREENHEIGHT : 0.0,

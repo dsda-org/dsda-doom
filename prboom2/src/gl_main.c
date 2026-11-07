@@ -759,8 +759,9 @@ void gld_DrawLine(int x0, int y0, int x1, int y1, int BaseColor)
 }
 
 
-static dboolean fuzz_overlap; // [PN] fuzz silhouettes left stencil counts
-static int fuzz_sprites;      // [PN] fuzz silhouettes in this frame
+static dboolean fuzz_overlap;    // [PN] fuzz silhouettes left stencil counts
+static int fuzz_sprites;         // [PN] fuzz silhouettes in this frame
+static dboolean fuzz_run_active; // [PN] a run of fuzz sprites is being drawn
 
 void gld_StartFuzz(int sprite, float ratio)
 {
@@ -817,6 +818,15 @@ void gld_EndFuzz()
     glStencilOp(GL_KEEP, GL_KEEP, GL_ZERO);
     glStencilMask(0xFF);
   }
+}
+
+static void gld_FlushFuzzRun(void)
+{
+  if (!fuzz_run_active)
+    return;
+
+  gld_EndFuzz();
+  fuzz_run_active = false;
 }
 
 void gld_DrawWeapon(int weaponlump, vissprite_t *vis, int lightlevel)
@@ -2071,9 +2081,6 @@ void gld_AddPlane(int subsectornum, visplane_t *floor, visplane_t *ceiling)
 
 static void gld_DrawSprite(GLSprite *sprite)
 {
-  GLint blend_src, blend_dst;
-  int restore = 0;
-
   dsda_RecordVisSprite();
 
   gld_BindPatch(sprite->gltexture,sprite->cm);
@@ -2082,20 +2089,30 @@ static void gld_DrawSprite(GLSprite *sprite)
   {
     if(sprite->flags & g_mf_shadow)
     {
+     if (fuzz_run_active)
+     {
+      glsl_SetFuzzSeed(gametic, sprite->id);
+     }
+     else
+     {
       // Fuzz has less aliasing if ratio is an integer
       float ratio = floor((SCREENWIDTH > SCREENHEIGHT ? SCREENHEIGHT : SCREENWIDTH) / 200.0);
-      glGetIntegerv(GL_BLEND_SRC, &blend_src);
-      glGetIntegerv(GL_BLEND_DST, &blend_dst);
-      restore = 1;
       gld_StartFuzz(sprite->id, ratio);
+      fuzz_run_active = true;
+     }
     }
     else
     {
+      gld_FlushFuzzRun();
       if (sprite->alpha != 1.f)
         gld_StaticLightAlpha(sprite->light, sprite->alpha);
       else
         gld_StaticLight(sprite->light);
     }
+  }
+  else
+  {
+    gld_FlushFuzzRun();
   }
 
   if (!(sprite->flags & (MF_SOLID | MF_SPAWNCEILING)))
@@ -2151,12 +2168,6 @@ static void gld_DrawSprite(GLSprite *sprite)
     glTexCoord2f(sprite->ul, sprite->vb); glVertex3f(x1, y2, z2);
     glTexCoord2f(sprite->ur, sprite->vb); glVertex3f(x2, y2, z1);
     glEnd();
-  }
-
-  if (restore)
-  {
-    glBlendFunc(blend_src, blend_dst);
-    gld_EndFuzz();
   }
 }
 
@@ -2513,6 +2524,8 @@ void gld_ProjectSprite(mobj_t* thing, int lightlevel)
 void gld_ProcessWall(GLWall *wall)
 {
   seg_t *seg = wall->seg;
+
+  gld_FlushFuzzRun();
 
   // The following code decides where to insert vertices in the left and right
   // sides of a wall polygon so that it precisely shares vertices with adjacent
@@ -2894,6 +2907,8 @@ void gld_DrawScene(player_t *player)
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_COLOR_ARRAY);
+
+  gld_FlushFuzzRun();
 
   glsl_PopMainShader();
 }

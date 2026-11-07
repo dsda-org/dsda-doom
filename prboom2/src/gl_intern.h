@@ -501,6 +501,7 @@ void glsl_PopNullShader(void);
 void glsl_PushMainShader(void);
 void glsl_PopMainShader(void);
 void glsl_PushFuzzShader(int tic, int sprite, float ratio, dboolean smear);
+void glsl_SetFuzzSeed(int tic, int sprite);
 void glsl_PopFuzzShader(void);
 void glsl_SetLightLevel(float lightlevel);
 
