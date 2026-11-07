@@ -4,10 +4,17 @@
 uniform sampler2D tex;
 // Fuzz lookup texture
 uniform sampler2D fuzz;
+// Copy of the frame buffer behind the fuzz
+uniform sampler2D scene;
 // Texture dimensions
 uniform vec2 tex_d;
 // Fuzz texture dimensions
 uniform vec2 fuzz_d;
+// Scene copy dimensions, zero when the copy is not available
+uniform vec2 scene_d;
+// 3D viewport rows in window coordinates, to keep the smear source
+// inside the view (status bar and letterbox rows must not leak in)
+uniform vec2 view_y;
 // Fuzz macro-pixel ratio in terms of window coordinates
 // If 0, use texture coordinates instead
 uniform float ratio;
@@ -29,8 +36,17 @@ float darkness(vec2 c)
 
 void main()
 {
+  // [PN] Transparent texels are rejected by the alpha test anyway, but only
+  // after the shader has run: skip the fuzz and scene fetches for them
+  float sprite = texture2D(tex, gl_TexCoord[0].xy).g;
+
+  if (sprite <= 0.0)
+    discard;
+
   // Ensure fuzz coordinate is identical for each fragment in fuzz macro-pixel
   vec2 c;
+  float d;
+  float alpha;
 
   // Use window coordinates if ratio is non-zero
   if (ratio != 0.0)
@@ -40,7 +56,38 @@ void main()
     // Use texture coordinates
     c = floor(gl_TexCoord[0].xy * tex_d);
 
+    d = darkness(c);
+    alpha = sprite * d;
+
+ if (scene_d.x > 0.0)
+ {
+  // [PN] The software fuzz fills each cell with a single pixel from one row
+  // above or below it, smearing the background vertically. Follow the same offsets.
+  float cell = ratio;
+
+  if (cell == 0.0)
+    cell = max(1.0, floor(min(scene_d.x, scene_d.y) / 200.0));
+ 
+  // Darkness is always one of the exact FUZZ1..5 constants, so the row
+  // count is recovered by midpoint comparisons instead of two log() per pixel.
+  float steps = 1.0 + float(d > 0.264706) + float(d > 0.401961)
+                    + float(d > 0.513726) + float(d > 0.605882);
+
+  // The scene copy is stored downscaled by cell: texel (t) holds a row
+  // of source cell row t, which is (steps) rows above the pixel's own cell
+  float t = floor(gl_FragCoord.y / cell) + steps - 1.0;
+
+  // Clamp to the viewport: a sprite touching its border would pull in
+  // the status bar line or the letterbox background from just outside
+  float row = clamp((t + 0.5) * cell, view_y.x, view_y.y - 1.0);
+
+  vec3 bg = texture2D(scene, vec2(gl_FragCoord.x / scene_d.x, row / scene_d.y)).rgb;
+  gl_FragColor = vec4(mix(bg, gl_Color.rgb, alpha), alpha);
+ }
+ else
+ {
   // [XA] new for 0.25: use darkness as an alpha value so the game can
   // pass in a non-black gl_color for pain/gamma support in indexed lightmode
-  gl_FragColor = vec4(gl_Color.rgb, texture2D(tex, gl_TexCoord[0].xy).g * darkness(c));
+  gl_FragColor = vec4(gl_Color.rgb, alpha);
+ }
 }
