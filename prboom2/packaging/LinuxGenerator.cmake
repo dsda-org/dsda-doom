@@ -27,6 +27,7 @@ endif()
 execute_process(
   COMMAND ${CMAKE_COMMAND} -E env
     LDAI_OUTPUT=${CPACK_PACKAGE_FILE_NAME}.appimage
+    "LDAI_UPDATE_INFORMATION=gh-releases-zsync|dsda-org|dsda-doom|latest|${CPACK_PACKAGE_UPDATE_INFO}.appimage.zsync"
     LINUXDEPLOY_OUTPUT_VERSION=${CPACK_PACKAGE_VERSION}
     NO_STRIP=1
     ${LINUXDEPLOY_EXECUTABLE}
