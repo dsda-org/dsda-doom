@@ -2239,7 +2239,7 @@ static void D_DoomMainSetup(void)
 
   //jff 9/3/98 use logical output routine
   lprintf(LO_DEBUG, "dsda_InitFont: Loading the hud fonts.\n");
-  dsda_InitFont();
+  dsda_InitAllFonts();
 
   if (!(dsda_Flag(dsda_arg_nodraw) && dsda_Flag(dsda_arg_nosound)))
     I_InitGraphics();
