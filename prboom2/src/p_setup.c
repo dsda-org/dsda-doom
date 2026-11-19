@@ -41,6 +41,7 @@
 #include "doomtype.h"
 #include "m_bbox.h"
 #include "g_game.h"
+#include "p_mobj.h"
 #include "w_wad.h"
 #include "r_main.h"
 #include "r_things.h"
@@ -1555,7 +1556,7 @@ static void P_PostProcessThings(int mobjcount, mobj_t **mobjlist)
 
   if (map_format.thing_id)
   {
-    map_format.build_mobj_thing_id_list();
+    P_CreateTIDList();
   }
 
   if (hexen)
