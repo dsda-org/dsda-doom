@@ -726,6 +726,9 @@ void P_RemoveActivePlat(plat_t* plat)
 {
   platlist_t *list = plat->list;
   plat->sector->floordata = NULL; //jff 2/23/98 multiple thinkers
+  // [AR] Hexen clears both floor and ceiling
+  if (hexen && !map_format.zdoom)
+    plat->sector->ceilingdata = NULL;
   P_TagFinished(plat->sector->tag);
   P_RemoveThinker(&plat->thinker);
   if ((*list->prev = list->next))
@@ -842,6 +845,7 @@ int EV_DoHexenPlat(line_t * line, byte * args, plattype_e type, int amount)
         plat->type = type;
         plat->sector = sec;
         plat->sector->floordata = plat;
+        plat->sector->ceilingdata = NULL;
         plat->thinker.function = T_PlatRaise;
         plat->crush = NO_CRUSH;
         plat->tag = args[0];
