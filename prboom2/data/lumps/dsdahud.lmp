@@ -14,6 +14,7 @@ minimap 264 8 top_right 48 48 1024
 message 0 0 top_left
 secret_message 0 76 none
 add_offset 1 top_left
+font STCFN 3
 
 heretic ex
 stat_totals 2 8 bottom_left

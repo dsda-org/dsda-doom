@@ -37,6 +37,7 @@ typedef struct {
 extern dsda_font_t hud_font;
 extern dsda_font_t exhud_font;
 
-void dsda_InitFont(void);
+void dsda_InitAllFonts(void);
+dsda_font_t dsda_InitFont(const char *lump_match, int suffix_size);
 
 #endif
