@@ -109,24 +109,66 @@ jobs:
           sudo apt-get upgrade
           sudo apt-get install -y \
             gcc \
+            g++ \
             ninja-build \
             pkg-config \
             libxmp-dev \
-            libfluidsynth-dev \
-            fluidsynth \
             libgl-dev \
             libglu1-mesa-dev \
             libmad0-dev \
             libportmidi-dev \
-            libsdl2-dev \
-            libsdl2-image-dev \
-            libsdl2-mixer-dev \
             libvorbis-dev \
             libsndfile1-dev \
             libzip-dev \
             zipcmp \
             zipmerge \
             ziptool
+
+      - name: Build and Install SDL (Linux)
+        if: runner.os == 'Linux'
+        uses: libsdl-org/setup-sdl@main
+        id: setup-sdl
+        with:
+          install-linux-dependencies: true
+          version: 3-latest
+          version-sdl2-compat: 2-latest
+          version-sdl-mixer: 2-latest
+          cmake-arguments: -DSDL2MIXER_VENDORED=ON -DSDL2MIXER_SAMPLES=OFF
+          version-sdl-image: 2-latest
+          build-type: RelWithDebInfo
+          pre-release: false
+          add-to-environment: true
+
+      # we need a newer fluidsynth that doesn't depend on glib
+      # which causes issues for sdl
+      - name: Fetch FluidSynth (Linux)
+        if: runner.os == 'Linux'
+        uses: actions/checkout@v7
+        with:
+          repository: FluidSynth/fluidsynth
+          ref: v2.6.2
+          submodules: recursive
+          path: fluidsynth
+
+      - name: Configure FluidSynth (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          cmake -S fluidsynth -B fluidsynth-build \
+            -GNinja \
+            -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+            -Denable-systemd=OFF \
+            -Denable-readline=OFF \
+            -Denable-dbus=OFF \
+            -Denable-pulseaudio=OFF \
+            -DCMAKE_INSTALL_PREFIX="${{ runner.temp }}/fluidsynth-install"
+
+      - name: Build FluidSynth (Linux)
+        if: runner.os == 'Linux'
+        run: cmake --build fluidsynth-build
+
+      - name: Install FluidSynth (Linux)
+        if: runner.os == 'Linux'
+        run: cmake --install fluidsynth-build
 
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
@@ -146,6 +188,8 @@ jobs:
           restore-keys: vcpkg-${{ matrix.config.triplet }}-
 
       - name: Configure
+        env:
+          CMAKE_PREFIX_PATH: ${{ runner.temp }}/fluidsynth-install
         run: >-
           cmake -S prboom2
           -B build
@@ -196,9 +240,11 @@ jobs:
 
       - name: Package
         if: ${{ matrix.config.package_name }}
+        env:
+          LD_LIBRARY_PATH: ${{ runner.temp }}/fluidsynth-install/lib:${{ env.LD_LIBRARY_PATH }}
         run: |
           cd build
-          cpack
+          cpack -DLINUXDEPLOY_ADDITIONAL_ARGS="--library=${{steps.setup-sdl.outputs.prefix}}/lib/libSDL3.so.0"
 
       - name: Upload Artifacts
         if: ${{ matrix.config.package_name }}

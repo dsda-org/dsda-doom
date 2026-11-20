@@ -1526,12 +1526,14 @@ static void RestoreMoveFloor(floormove_t *th)
 static void RestorePlatRaise(plat_t *plat)
 {
     plat->sector->floordata = T_PlatRaise;
+    plat->sector->ceilingdata = NULL;
     P_AddActivePlat(plat);
 }
 
 static void RestoreMoveCeiling(ceiling_t *ceiling)
 {
     ceiling->sector->ceilingdata = T_MoveCeiling;
+    ceiling->sector->floordata = NULL;
     P_AddActiveCeiling(ceiling);
 }
 

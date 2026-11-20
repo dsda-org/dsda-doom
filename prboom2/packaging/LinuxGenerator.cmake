@@ -37,5 +37,6 @@ execute_process(
     --desktop-file=${CPACK_TEMPORARY_DIRECTORY}/${CPACK_PACKAGING_INSTALL_PREFIX}/share/applications/dsda-doom.desktop
     --icon-file=${CPACK_TEMPORARY_DIRECTORY}/${CPACK_PACKAGING_INSTALL_PREFIX}/share/icons/hicolor/scalable/apps/dsda-doom.svg
     --output=appimage
+    ${LINUXDEPLOY_ADDITIONAL_ARGS}
   COMMAND_ERROR_IS_FATAL ANY
 )

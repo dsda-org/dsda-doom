@@ -376,6 +376,8 @@ void T_VerticalHexenDoor(vldoor_t *door)
         {
           case DREV_NORMAL:
           case DREV_CLOSE:
+            // [AR] Hexen clears both floor and ceiling
+            door->sector->floordata = NULL;
             door->sector->ceilingdata = NULL;
             P_TagFinished(door->sector->tag);
             P_RemoveThinker(&door->thinker);        // unlink and free
@@ -414,6 +416,8 @@ void T_VerticalHexenDoor(vldoor_t *door)
             break;
           case DREV_CLOSE30THENOPEN:
           case DREV_OPEN:
+            // [AR] Hexen clears both floor and ceiling
+            door->sector->floordata = NULL;
             door->sector->ceilingdata = NULL;
             P_TagFinished(door->sector->tag);
             P_RemoveThinker(&door->thinker);        // unlink and free
@@ -1177,6 +1181,7 @@ int Hexen_EV_DoDoor(line_t * line, byte * args, vldoor_e type)
         memset(door, 0, sizeof(*door));
         P_AddThinker(&door->thinker);
         sec->ceilingdata = door;
+        sec->floordata = NULL;
         door->thinker.function = T_VerticalDoor;
         door->sector = sec;
         door->line = line;
@@ -1230,6 +1235,7 @@ dboolean Hexen_EV_VerticalDoor(line_t * line, mobj_t * thing)
     memset(door, 0, sizeof(*door));
     P_AddThinker(&door->thinker);
     sec->ceilingdata = door;
+    sec->floordata = NULL;
     door->thinker.function = T_VerticalDoor;
     door->sector = sec;
     door->line = line;
