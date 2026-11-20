@@ -14,6 +14,7 @@
 [![Downloads (latest)](https://img.shields.io/github/downloads/dsda-org/dsda-doom/latest/total.svg)](https://github.com/dsda-org/dsda-doom/releases/latest)
 [![Downloads (total)](https://img.shields.io/github/downloads/dsda-org/dsda-doom/total)](https://github.com/dsda-org/dsda-doom/releases/latest)
 <br>
+![DoomWorld](https://img.shields.io/badge/DoomWorld-Thread-blue?link=https%3A%2F%2Fwww.doomworld.com%2Fforum%2Ftopic%2F150766)
 [![Discord](https://img.shields.io/discord/218106532406099969?logoColor=white&logo=discord&label=Discord)](https://discord.gg/9paQ52zQUT)
 
 </div>
