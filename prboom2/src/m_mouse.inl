@@ -59,11 +59,6 @@ static dboolean M_MouseTabHovered(int page)
   return page == menu_mouse_hover_tab;
 }
 
-static int M_MouseClamp(int value, int low, int high)
-{
-  return BETWEEN(low, high, value);
-}
-
 static void M_MouseBeginSetupNavigation(void)
 {
   setup_menu_layout_t layout;
@@ -109,8 +104,8 @@ static void M_MouseSetLogicalPosition(int x, int y)
 
   menu_mouse_in_viewport = x >= 0 && y >= 0 && x < viewport_w && y < viewport_h;
 
-  x = M_MouseClamp(x, 0, viewport_w - 1);
-  y = M_MouseClamp(y, 0, viewport_h - 1);
+  x = CLAMP(x, 0, viewport_w - 1);
+  y = CLAMP(y, 0, viewport_h - 1);
 
   x = x * screen_w / viewport_w;
   y = y * screen_h / viewport_h;
@@ -127,8 +122,8 @@ static void M_MouseSetLogicalPosition(int x, int y)
     y = y * MENU_MOUSE_HEIGHT / screen_h;
   }
 
-  menu_mouse_x = M_MouseClamp(x, 0, BASE_WIDTH - 1);
-  menu_mouse_y = M_MouseClamp(y, 0, MENU_MOUSE_HEIGHT - 1);
+  menu_mouse_x = CLAMP(x, 0, BASE_WIDTH - 1);
+  menu_mouse_y = CLAMP(y, 0, MENU_MOUSE_HEIGHT - 1);
 }
 
 static void M_MouseReadPosition(void)
@@ -400,10 +395,10 @@ static int M_MouseSliderValue(int x, int slider_x, int width, int low, int high)
   if (range <= 1 || width <= 0)
     return low;
 
-  rel = M_MouseClamp(rel, 0, span - 1);
+  rel = CLAMP(rel, 0, span - 1);
   value = low + rel * range / span;
 
-  return M_MouseClamp(value, low, high);
+  return CLAMP(value, low, high);
 }
 
 static int M_MouseThermoValue(int x, int slider_x, int width, int low, int high)
@@ -920,7 +915,7 @@ static dboolean M_MouseScrollSetup(int action)
     return false;
 
   scroll = menu_mouse_setup_scroll + (action == MENU_DOWN ? 1 : -1);
-  menu_mouse_setup_scroll = M_MouseClamp(scroll, 0, layout.excess_i);
+  menu_mouse_setup_scroll = CLAMP(scroll, 0, layout.excess_i);
   M_MouseUpdateSetupHover();
 
   return true;

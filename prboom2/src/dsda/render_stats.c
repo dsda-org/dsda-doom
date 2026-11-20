@@ -82,7 +82,7 @@ void dsda_UpdateRenderStats(void) {
     dsda_render_stats = interval_stats;
     ZERO_DATA(interval_stats);
     dsda_UpdateMaxValues(&dsda_render_stats_max, &dsda_render_stats);
-    dsda_render_stats_fps = frame_count * 1000 / dsda_ElapsedTimeMS(dsda_timer_render_stats);
+    dsda_render_stats_fps = (int)(frame_count * 1000 / dsda_ElapsedTimeMS(dsda_timer_render_stats));
     frame_count = 0;
     dsda_StartTimer(dsda_timer_render_stats);
   }

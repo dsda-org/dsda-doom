@@ -919,8 +919,8 @@ static void gld_PreprocessSectors(void)
     for (j=0; j<sectors[i].linecount; j++)
     {
       line_t *l = sectors[i].lines[j];
-      v1num = l->v1 - vertexes;
-      v2num = l->v2 - vertexes;
+      v1num = (int)(l->v1 - vertexes);
+      v2num = (int)(l->v2 - vertexes);
 
       // e6y: for correct handling of missing textures.
       // We do not need to apply some algos for isolated lines.
@@ -968,8 +968,8 @@ static void gld_PreprocessSectors(void)
     // e6y: marking all the isolated lines
     for (j=0; j<sectors[i].linecount; j++)
     {
-      v1num=((intptr_t)sectors[i].lines[j]->v1-(intptr_t)vertexes)/sizeof(vertex_t);
-      v2num=((intptr_t)sectors[i].lines[j]->v2-(intptr_t)vertexes)/sizeof(vertex_t);
+      v1num=(int)(((intptr_t)sectors[i].lines[j]->v1-(intptr_t)vertexes)/sizeof(vertex_t));
+      v2num=(int)(((intptr_t)sectors[i].lines[j]->v2-(intptr_t)vertexes)/sizeof(vertex_t));
       if (vertexcheck2[v1num] < 2 && vertexcheck2[v2num] < 2)
       {
         sectors[i].lines[j]->r_flags |= RF_ISOLATED;

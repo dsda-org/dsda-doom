@@ -477,8 +477,8 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher)
   int      sound;
   fixed_t  delta = special->z - toucher->z;
 
-  if (heretic) return Heretic_P_TouchSpecialThing(special, toucher);
-  if (hexen) return Hexen_P_TouchSpecialThing(special, toucher);
+  if (heretic)  RETURN(Heretic_P_TouchSpecialThing(special, toucher));
+  if (hexen)    RETURN(Hexen_P_TouchSpecialThing(special, toucher));
 
   if (delta > toucher->height || delta < -8*FRACUNIT)
     return;        // out of reach
@@ -933,7 +933,7 @@ static void P_KillMobj(mobj_t *source, mobj_t *target)
             else
             {
               unsigned int player;
-              for (player = 0; player < g_maxplayers; player++)
+              for (player = 0; player < (unsigned int)g_maxplayers; player++)
               {
                 if (playeringame[player])
                 {
@@ -960,14 +960,14 @@ static void P_KillMobj(mobj_t *source, mobj_t *target)
             //  and do it uniformly between the active players
             unsigned int activeplayers = 0, player, i;
 
-            for (player = 0; player < g_maxplayers; player++)
+            for (player = 0; player < (unsigned int)g_maxplayers; player++)
               if (playeringame[player])
                 activeplayers++;
 
             if (activeplayers) {
               player = P_Random(pr_friends) % activeplayers;
 
-              for (i = 0; i < g_maxplayers; i++)
+              for (i = 0; i < (unsigned int)g_maxplayers; i++)
                 if (playeringame[i])
                   if (!player--)
                   {
@@ -2460,7 +2460,7 @@ dboolean P_ChickenMorphPlayer(player_t * player)
     fixed_t y;
     fixed_t z;
     angle_t angle;
-    int oldFlags2;
+    uint64_t oldFlags2;
 
     if (player->chickenTics)
     {
@@ -3555,7 +3555,7 @@ dboolean P_MorphPlayer(player_t * player)
     fixed_t y;
     fixed_t z;
     angle_t angle;
-    int oldFlags2;
+    uint64_t oldFlags2;
 
     if (player->powers[pw_invulnerability])
     {                           // Immune when invulnerable

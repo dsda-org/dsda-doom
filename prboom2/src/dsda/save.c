@@ -289,7 +289,7 @@ char* dsda_SaveGameName(int slot, dboolean via_cmd) {
 
   save_type = (via_cmd && demoplayback) ? "demosav" : savegamename;
 
-  length = strlen(save_type) + strlen(save_dir) + 10; // "/" + "9999.dsg\0"
+  length = (int)(strlen(save_type) + strlen(save_dir) + 10); // "/" + "9999.dsg\0"
 
   name = Z_Malloc(length);
 

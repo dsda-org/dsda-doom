@@ -69,7 +69,7 @@ void (*Scanner::error)(const char*, ...) = __ScannerStandardError;
 Scanner::Scanner(const char* data, int length) : line(1), lineStart(0), logicalPosition(0), tokenLine(1), tokenLinePosition(0), scanPos(0), needNext(true)
 {
 	if(length == -1)
-		length = strlen(data);
+		length = (int)strlen(data);
 	this->length = length;
 	this->data = new char[length];
 	memcpy(this->data, data, length);
@@ -87,7 +87,7 @@ Scanner::~Scanner()
 void Scanner::SetString(char **ptr, const char *start, unsigned int length)
 {
 	if (length == -1)
-		length = strlen(start);
+		length = (unsigned int)strlen(start);
 	if (*ptr != NULL) free(*ptr);
 	*ptr = (char*)malloc(length + 1);
 	memcpy(*ptr, start, length);

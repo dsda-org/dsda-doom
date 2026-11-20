@@ -1469,7 +1469,7 @@ void P_PlayerCollectSecret(player_t *player)
     if (I_GetSfxLumpNum(&S_sfx[g_sfx_secret]) != -1)
       sfx_id = g_sfx_secret;
 
-    SetCustomMessage(player - players, s_HUSTR_SECRETFOUND, 2 * TICRATE, sfx_id);
+    SetCustomMessage((int)(player - players), s_HUSTR_SECRETFOUND, 2 * TICRATE, sfx_id);
   }
 }
 
@@ -3345,7 +3345,7 @@ void P_SpawnZDoomSectorSpecial(sector_t *sector, int i)
   switch (sector->special)
   {
     case zs_d_scroll_east_lava_damage:
-      dsda_AddFloorScroller(-4, 0, sector - sectors, 0);
+      dsda_AddFloorScroller(-4, 0, (int)(sector - sectors), 0);
       P_SetupSectorDamage(sector, 5, 32, 0, SECF_DMGTERRAINFX | SECF_DMGUNBLOCKABLE);
       break;
     case zs_s_light_strobe_hurt:
@@ -3433,14 +3433,14 @@ void P_SpawnZDoomSectorSpecial(sector_t *sector, int i)
         i = sector->special - zs_scroll_north_slow;
         dx = FixedDiv(hexenScrollies[i][0] << FRACBITS, 2);
         dy = FixedDiv(hexenScrollies[i][1] << FRACBITS, 2);
-        dsda_AddFloorScroller(dx, dy, sector - sectors, 0);
+        dsda_AddFloorScroller(dx, dy, (int)(sector - sectors), 0);
       }
       else if (sector->special >= zs_carry_east5 &&
             sector->special <= zs_carry_east35)
       { // Heretic scroll special
         // Only east scrollers also scroll the texture
         fixed_t dx = FixedDiv((1 << (sector->special - zs_carry_east5)) << FRACBITS, 2);
-        dsda_AddFloorScroller(dx, 0, sector - sectors, 0);
+        dsda_AddFloorScroller(dx, 0, (int)(sector - sectors), 0);
       }
       break;
   }
@@ -3671,7 +3671,7 @@ static void Hexen_P_SpawnSpecials(void);
 // Parses command line parameters.
 void P_SpawnSpecials (void)
 {
-  if (hexen) return Hexen_P_SpawnSpecials();
+  if (hexen) RETURN(Hexen_P_SpawnSpecials());
 
   P_EvaluateDeathmatchParams();
 
@@ -3686,7 +3686,7 @@ void P_SpawnSpecials (void)
 
   P_SpawnScrollers(); // killough 3/7/98: Add generalized scrollers
 
-  if (demo_compatibility) return P_SpawnVanillaExtras();
+  if (demo_compatibility) RETURN(P_SpawnVanillaExtras());
 
   P_SpawnFriction();  // phares 3/12/98: New friction model using linedefs
   P_SpawnPushers();   // phares 3/20/98: New pusher model using linedefs
@@ -6892,8 +6892,8 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
         const int *id_p;
         angle_t floor, ceiling;
 
-        floor = dsda_DegreesToAngle(args[1]);
-        ceiling = dsda_DegreesToAngle(args[2]);
+        floor = dsda_DegreesToAngle((float)args[1]);
+        ceiling = dsda_DegreesToAngle((float)args[2]);
 
         FIND_SECTORS(id_p, args[0])
         {
@@ -7165,7 +7165,7 @@ dboolean P_ExecuteZDoomLineSpecial(int special, int * args, line_t * line, int s
         mobj_t *spawn_location;
         thing_id_search_t search;
 
-        args[0] = BETWEEN(1, 9, args[0]);
+        args[0] = CLAMP(args[0], 1, 9);
 
         dsda_ResetThingIDSearch(&search);
         while ((spawn_location = dsda_FindMobjFromThingIDOrMobj(args[4], mo, &search)))

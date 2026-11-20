@@ -193,7 +193,7 @@ void SetCrosshairTarget(void)
         h = h * params->video->height / 200;
       }
       bottom = top - viewheight + h;
-      winy = BETWEEN(bottom, top, winy);
+      winy = CLAMP(winy, bottom, top);
 
       if (!hudadd_crosshair_scale)
       {

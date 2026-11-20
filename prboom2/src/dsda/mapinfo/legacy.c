@@ -160,7 +160,7 @@ int dsda_LegacyNextMap(int* episode, int* map) {
     if (gamemode == registered)
       heretic_next[2][7] = 11;
 
-    next = heretic_next[BETWEEN(0, 5, *episode)][BETWEEN(0, 8, *map)];
+    next = heretic_next[CLAMP(*episode, 0, 5)][CLAMP(*map, 0, 8)];
     *episode = next / 10;
     *map = next % 10;
   }
@@ -179,7 +179,7 @@ int dsda_LegacyNextMap(int* episode, int* map) {
     }
 
     *episode = 1;
-    *map = doom2_next[BETWEEN(0, 32, *map)];
+    *map = doom2_next[CLAMP(*map, 0, 32)];
   }
   else {
     int next;
@@ -190,7 +190,7 @@ int dsda_LegacyNextMap(int* episode, int* map) {
     doom_next[2][7] = // the fourth episode for pre-ultimate complevels is not allowed
       ((gamemode == registered) || (compatibility_level < ultdoom_compatibility) ? 11 : 41);
 
-    next = doom_next[BETWEEN(0, 3, *episode)][BETWEEN(0, 9, *map)];
+    next = doom_next[CLAMP(*episode, 0, 3)][CLAMP(*map, 0, 9)];
     *episode = next / 10;
     *map = next % 10;
   }
@@ -227,7 +227,7 @@ int dsda_LegacyPrevMap(int* episode, int* map) {
   if (heretic) {
     int prev;
 
-    prev = heretic_prev[BETWEEN(0, 5, *episode)][BETWEEN(0, 8, *map)];
+    prev = heretic_prev[CLAMP(*episode, 0, 5)][CLAMP(*map, 0, 8)];
     *episode = prev / 10;
     *map = prev % 10;
   }
@@ -245,12 +245,12 @@ int dsda_LegacyPrevMap(int* episode, int* map) {
     }
 
     *episode = 1;
-    *map = doom2_prev[BETWEEN(0, 32, *map)];
+    *map = doom2_prev[CLAMP(*map, 0, 32)];
   }
   else {
     int prev;
 
-    prev = doom_prev[BETWEEN(0, 3, *episode)][BETWEEN(0, 9, *map)];
+    prev = doom_prev[CLAMP(*episode, 0, 3)][CLAMP(*map, 0, 9)];
     *episode = prev / 10;
     *map = prev % 10;
   }

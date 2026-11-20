@@ -78,11 +78,11 @@ void Hexen_F_Ticker(void)
         switch (FinaleStage)
         {
             case 1:            // Text 1
-                FinaleEndCount = strlen(FinaleText) * TEXTSPEED + TEXTWAIT;
+                FinaleEndCount = (int)strlen(FinaleText) * TEXTSPEED + TEXTWAIT;
                 break;
             case 2:            // Pic 2, Text 2
                 FinaleText = GetFinaleText(1);
-                FinaleEndCount = strlen(FinaleText) * TEXTSPEED + TEXTWAIT;
+                FinaleEndCount = (int)strlen(FinaleText) * TEXTSPEED + TEXTWAIT;
                 FinaleLumpName = "FINALE2";
                 S_ChangeMusic(hexen_mus_orb, false);
                 break;

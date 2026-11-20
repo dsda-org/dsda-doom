@@ -876,7 +876,7 @@ void dsda_UpdateStringArg(dsda_arg_identifier_t id, const char* param) {
 
 void dsda_AppendStringArg(dsda_arg_identifier_t id, const char* param) {
   if (arg_config[id].type == arg_string)
-    return dsda_UpdateStringArg(id, param);
+    RETURN(dsda_UpdateStringArg(id, param));
 
   param = Z_Strdup(param);
 

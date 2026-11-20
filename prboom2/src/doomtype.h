@@ -51,8 +51,19 @@ typedef unsigned char byte;
 #ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
-#ifndef BETWEEN
-#define BETWEEN(l,u,x) ((l)>(x)?(l):(x)>(u)?(u):(x))
+#ifndef CLAMP
+#define CLAMP(x, min, max) ((min) > (x) ? (min) : (x) > (max) ? (max) : (x))
+#endif
+
+// [AR] supress MSVC void function return warnings
+#ifdef _MSC_VER
+#define RETURN(x) \
+    __pragma(warning(push)) \
+    __pragma(warning(disable:4098)) \
+    return x; \
+    __pragma(warning(pop))
+#else
+#define RETURN(x) return x
 #endif
 
 #include <inttypes.h>

@@ -101,8 +101,8 @@ void F_StartFinale (void)
   endpalette = NULL;
   finaletype = EG_None;
 
-  if (heretic) return Heretic_F_StartFinale();
-  if (hexen) return Hexen_F_StartFinale();
+  if (heretic)  RETURN(Heretic_F_StartFinale());
+  if (hexen)    RETURN(Hexen_F_StartFinale());
 
   gameaction = ga_nothing;
   gamestate = GS_FINALE;
@@ -324,8 +324,8 @@ void F_Ticker(void)
 {
   int i;
 
-  if (heretic) return Heretic_F_Ticker();
-  if (hexen) return Hexen_F_Ticker();
+  if (heretic)  RETURN(Heretic_F_Ticker());
+  if (hexen)    RETURN(Hexen_F_Ticker());
 
   if (dsda_FTicker())
   {
@@ -870,8 +870,8 @@ void F_StartPostFinale (void)
 //
 void F_Drawer (void)
 {
-  if (heretic) return Heretic_F_Drawer();
-  if (hexen) return Hexen_F_Drawer();
+  if (heretic)  RETURN(Heretic_F_Drawer());
+  if (hexen)    RETURN(Hexen_F_Drawer());
 
   if (dsda_FDrawer())
   {
