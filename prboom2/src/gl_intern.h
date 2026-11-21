@@ -367,6 +367,9 @@ GLTexture *gld_RegisterColormapTexture(int palette_index, int gamma_level, dbool
 void gld_BindColormapTexture(GLTexture *gltexture, int palette_index, int gamma_level, dboolean fullbright);
 void gld_InitColormapTextures(dboolean fullbright);
 void gld_InitFuzzTexture(void);
+dboolean gld_BindFuzzScene(int cell);
+void gld_RefreshFuzzScene(void);
+void gld_UnbindFuzzScene(void);
 int gld_GetTexDimension(int value);
 void gld_SetIndexedPalette(int palette_index);
 void gld_Precache(void);
@@ -497,7 +500,8 @@ void glsl_PushNullShader(void);
 void glsl_PopNullShader(void);
 void glsl_PushMainShader(void);
 void glsl_PopMainShader(void);
-void glsl_PushFuzzShader(int tic, int sprite, float ratio);
+void glsl_PushFuzzShader(int tic, int sprite, float ratio, dboolean smear);
+void glsl_SetFuzzSeed(int tic, int sprite);
 void glsl_PopFuzzShader(void);
 void glsl_SetLightLevel(float lightlevel);
 

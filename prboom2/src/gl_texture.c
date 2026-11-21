@@ -1347,6 +1347,121 @@ static const float fuzz[50] =
 
 static GLuint fuzz_texid = 0;
 
+// [PN] Scene copy for the fuzz smear, stored vertically downscaled by the
+// macro-pixel cell (the smear reads one row per cell).
+static GLuint fuzzscene_texid = 0;
+static GLuint fuzzscene_fbo = 0;
+static GLint fuzzscene_prev = 0;
+static int fuzzscene_width = 0;
+static int fuzzscene_height = 0;
+static int fuzzscene_cell = 0;
+static int fuzzscene_frame = -1; // one snapshot per rendered frame
+static dboolean fuzzscene_ok = true;
+static dboolean fuzzscene_probe = true;
+
+dboolean gld_BindFuzzScene(int cell)
+{
+  if (cell < 1)
+    cell = 1;
+
+  GLEXT_glActiveTextureARB(GL_TEXTURE2_ARB);
+  glGetIntegerv(GL_TEXTURE_BINDING_2D, &fuzzscene_prev);
+
+  if (fuzzscene_texid == 0)
+    glGenTextures(1, &fuzzscene_texid);
+
+  glBindTexture(GL_TEXTURE_2D, fuzzscene_texid);
+
+  const int tex_h = gl_ext_framebuffer_blit ? SCREENHEIGHT / cell : SCREENHEIGHT;
+
+  if (fuzzscene_width != SCREENWIDTH || fuzzscene_height != tex_h || fuzzscene_cell != cell)
+  {
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCREENWIDTH, tex_h, 0,
+                 GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    // [PN] A blit needs a framebuffer, so wrap the copy texture in an FBO once;
+    // the current draw target is saved and restored around the setup.
+    if (gl_ext_framebuffer_blit && fuzzscene_fbo == 0)
+    {
+      GLint prev_fbo = 0;
+
+      glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING_EXT, &prev_fbo);
+      GLEXT_glGenFramebuffersEXT(1, &fuzzscene_fbo);
+      GLEXT_glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fuzzscene_fbo);
+      GLEXT_glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT,
+                                      GL_TEXTURE_2D, fuzzscene_texid, 0);
+      GLEXT_glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, prev_fbo);
+    }
+
+    fuzzscene_width = SCREENWIDTH;
+    fuzzscene_height = tex_h;
+    fuzzscene_cell = cell;
+    fuzzscene_frame = -1;
+    fuzzscene_ok = true;
+    fuzzscene_probe = true;
+  }
+
+  if (fuzzscene_ok && fuzzscene_frame != rendermarker)
+  {
+    // [PN] glGetError flushes the pipeline, so only the first copy after
+    // (re)allocation is probed; a multisampled buffer can't be copied directly.
+    if (fuzzscene_probe)
+    while (glGetError() != GL_NO_ERROR);
+
+    // [PN] Blit a source that is (height * cell) tall into the shorter texture:
+    // a NEAREST vertical downscale by cell; 1:1 copy without blit support.
+    if (gl_ext_framebuffer_blit && fuzzscene_fbo)
+    {
+      // Reads whatever the scene renders into (scene FBO or back buffer).
+      GLint prev_fbo = 0;
+
+      glGetIntegerv(GL_DRAW_FRAMEBUFFER_BINDING_EXT, &prev_fbo);
+      GLEXT_glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, fuzzscene_fbo);
+      // The blit is clipped by the scissor box (the 3D viewport during the
+      // world pass), so turn it off for the full-frame copy.
+      glDisable(GL_SCISSOR_TEST);
+      GLEXT_glBlitFramebufferEXT(0, 0, fuzzscene_width, fuzzscene_height * cell,
+                                 0, 0, fuzzscene_width, fuzzscene_height,
+                                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
+      glEnable(GL_SCISSOR_TEST);
+      GLEXT_glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, prev_fbo);
+    }
+    else
+    {
+      glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0,
+                          fuzzscene_width, fuzzscene_height);
+    }
+
+    if (fuzzscene_probe && glGetError() != GL_NO_ERROR)
+      fuzzscene_ok = false;
+
+    if (fuzzscene_ok)
+      fuzzscene_frame = rendermarker;
+
+    fuzzscene_probe = false;
+  }
+
+  GLEXT_glActiveTextureARB(GL_TEXTURE0_ARB);
+
+  return fuzzscene_ok;
+}
+
+void gld_RefreshFuzzScene(void)
+{
+  fuzzscene_frame = -1;
+}
+
+void gld_UnbindFuzzScene(void)
+{
+  GLEXT_glActiveTextureARB(GL_TEXTURE2_ARB);
+  glBindTexture(GL_TEXTURE_2D, fuzzscene_prev);
+  GLEXT_glActiveTextureARB(GL_TEXTURE0_ARB);
+}
+
 void gld_InitFuzzTexture(void)
 {
   if (fuzz_texid == 0)
@@ -1428,6 +1543,21 @@ void gld_FlushTextures(void)
     glDeleteTextures(1, &fuzz_texid);
     fuzz_texid = 0;
   }
+
+  if (fuzzscene_texid)
+  {
+    glDeleteTextures(1, &fuzzscene_texid);
+    fuzzscene_texid = 0;
+  }
+
+  if (fuzzscene_fbo)
+  {
+    GLEXT_glDeleteFramebuffersEXT(1, &fuzzscene_fbo);
+    fuzzscene_fbo = 0;
+  }
+
+  // Force the texture and the wrapper FBO to be recreated on the next bind
+  fuzzscene_width = 0;
 
   gld_ResetLastTexture();
 
