@@ -40,5 +40,6 @@ string(REPLACE "windows" "win" platform_name "${platform_name}")
 string(REPLACE "darwin" "mac" platform_name "${platform_name}")
 
 set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${PROJECT_VERSION}-${platform_name}-${target_arch}")
+set(CPACK_PACKAGE_UPDATE_INFO "${CPACK_PACKAGE_NAME}-*-${platform_name}-${target_arch}")
 
 include(CPack)

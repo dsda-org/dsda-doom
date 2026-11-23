@@ -66,7 +66,9 @@ jobs:
             release: true
             package_name: "linux_gcc"
             shell: bash
-            artifact-path: build/*.appimage
+            artifact-path: |
+              build/*.appimage
+              build/*.appimage.zsync
 
           - name: "macOS arm64 (brew)"
             os: macos-latest
