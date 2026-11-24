@@ -759,13 +759,40 @@ void gld_DrawLine(int x0, int y0, int x1, int y1, int BaseColor)
 }
 
 
+static dboolean fuzz_overlap;    // [PN] fuzz silhouettes left stencil counts
+static int fuzz_sprites;         // [PN] fuzz silhouettes in this frame
+static dboolean fuzz_run_active; // [PN] a run of fuzz sprites is being drawn
+
 void gld_StartFuzz(int sprite, float ratio)
 {
   color_rgb_t color;
+  dboolean smear;
+
+  // [PN] Mirrors the cell the shader uses for smear sampling.
+  const int cell = ratio > 0.0f ? (int)ratio : MAX(1, MIN(SCREENWIDTH, SCREENHEIGHT) / 200);
+
+  // [PN] Copy the scene so the shader can smear the background behind the fuzz.
+  smear = gld_BindFuzzScene(cell);
 
   // shader init
-  glsl_PushFuzzShader(gametic, sprite, ratio);
+  glsl_PushFuzzShader(gametic, sprite, ratio, smear);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+  // The shader mixes the fuzz with the shifted background itself
+  if (smear)
+    glDisable(GL_BLEND);
+
+  // [PN] Count overlapping silhouettes in the stencil; gld_EndDrawScene turns
+  // counts >= 2 into the extra darkening layers the shared snapshot cannot add.
+  // -1 is a HUD weapon.
+  if (smear && sprite != -1 && fuzz_sprites >= 2)
+  {
+    glEnable(GL_STENCIL_TEST);
+    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_INCR);
+    glStencilMask(0xFF);
+    fuzz_overlap = true;
+  }
 
   // for indexed lightmode, the fuzz color needs to take
   // pain/item fades and gamma into account, so do a color
@@ -779,6 +806,27 @@ void gld_StartFuzz(int sprite, float ratio)
 void gld_EndFuzz()
 {
   glsl_PopFuzzShader();
+  glEnable(GL_BLEND);
+  gld_UnbindFuzzScene();
+
+  if (fuzz_overlap)
+  {
+    // [PN] Everything drawn after a fuzz sprite is in front of it, so keep the
+    // test enabled and let it clear the counts it covers. Otherwise the veil
+    // pass would darken sprites closer than the fuzz.
+    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_ZERO);
+    glStencilMask(0xFF);
+  }
+}
+
+static void gld_FlushFuzzRun(void)
+{
+  if (!fuzz_run_active)
+    return;
+
+  gld_EndFuzz();
+  fuzz_run_active = false;
 }
 
 void gld_DrawWeapon(int weaponlump, vissprite_t *vis, int lightlevel)
@@ -817,7 +865,10 @@ void gld_DrawWeapon(int weaponlump, vissprite_t *vis, int lightlevel)
   // when invisibility is about to go
   if (/*(viewplayer->mo->flags & MF_SHADOW) && */!vis->colormap)
   {
-    gld_StartFuzz(-1, 0);
+    // [PN] Use screen-space fuzz cells for the weapon as well: texture-space
+    // cells made the fuzz lookup disagree with the scene copy's cell grid and
+    // could leave one-pixel seams in the melting.
+    gld_StartFuzz(-1, (float)MAX(1, MIN(SCREENWIDTH, SCREENHEIGHT) / 200));
   }
   else
   {
@@ -1082,6 +1133,7 @@ void gld_StartDrawScene(void)
 
   rendermarker++;
   scene_has_overlapped_sprites = false;
+  fuzz_overlap = false;
 }
 
 void gld_EndDrawScene(void)
@@ -1090,6 +1142,49 @@ void gld_EndDrawScene(void)
 
   glViewport(0, 0, SCREENWIDTH, SCREENHEIGHT);
   gld_Set2DMode();
+
+  // [PN] Fuzz-over-fuzz: the shared snapshot cannot stack extra darkening, so
+  // the stencil counts overlapping silhouettes and adds one veil layer per level.
+  if (fuzz_overlap)
+  {
+    color_rgb_t color = gld_LookupIndexedColor(invul_cm ? playpal_lightest : playpal_darkest, true);
+    int k;
+
+    glsl_PushNullShader();
+    gld_EnableTexture2D(GL_TEXTURE0_ARB, false);
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    glEnable(GL_STENCIL_TEST);
+    glStencilOp(GL_KEEP, GL_KEEP, GL_KEEP);
+    glStencilMask(0);
+    glColor4f((float)color.r / 255.0f, (float)color.g / 255.0f,
+              (float)color.b / 255.0f, 0.25f);
+
+    // [PN] No more veil layers than fuzz silhouettes.
+    for (k = 2; k <= MIN(fuzz_sprites, 6); k++)
+    {
+      glStencilFunc(GL_LEQUAL, k, 0xFF);
+      glRectf(0.0f, 0.0f, (GLfloat)SCREENWIDTH, (GLfloat)SCREENHEIGHT);
+    }
+
+    glStencilMask(0xFF);
+    glDisable(GL_STENCIL_TEST);
+    gld_EnableTexture2D(GL_TEXTURE0_ARB, true);
+    glsl_PopNullShader();
+
+    // Do not leave the counts behind for the next frame
+    glStencilMask(0xFF);
+    glClearStencil(0);
+    glClear(GL_STENCIL_BUFFER_BIT);
+    glStencilFunc(GL_ALWAYS, 0, 0xFF);
+    glDisable(GL_STENCIL_TEST);
+
+    fuzz_overlap = false;
+  }
+
+  // [PN] The HUD weapon is drawn after the world, so refresh the snapshot:
+  // otherwise it would melt with the world copy taken at the first fuzz sprite
+  gld_RefreshFuzzScene();
 
   glsl_PushMainShader();
   R_DrawPlayerSprites();
@@ -1986,9 +2081,6 @@ void gld_AddPlane(int subsectornum, visplane_t *floor, visplane_t *ceiling)
 
 static void gld_DrawSprite(GLSprite *sprite)
 {
-  GLint blend_src, blend_dst;
-  int restore = 0;
-
   dsda_RecordVisSprite();
 
   gld_BindPatch(sprite->gltexture,sprite->cm);
@@ -1997,20 +2089,30 @@ static void gld_DrawSprite(GLSprite *sprite)
   {
     if(sprite->flags & g_mf_shadow)
     {
+     if (fuzz_run_active)
+     {
+      glsl_SetFuzzSeed(gametic, sprite->id);
+     }
+     else
+     {
       // Fuzz has less aliasing if ratio is an integer
       float ratio = floor((SCREENWIDTH > SCREENHEIGHT ? SCREENHEIGHT : SCREENWIDTH) / 200.0);
-      glGetIntegerv(GL_BLEND_SRC, &blend_src);
-      glGetIntegerv(GL_BLEND_DST, &blend_dst);
-      restore = 1;
       gld_StartFuzz(sprite->id, ratio);
+      fuzz_run_active = true;
+     }
     }
     else
     {
+      gld_FlushFuzzRun();
       if (sprite->alpha != 1.f)
         gld_StaticLightAlpha(sprite->light, sprite->alpha);
       else
         gld_StaticLight(sprite->light);
     }
+  }
+  else
+  {
+    gld_FlushFuzzRun();
   }
 
   if (!(sprite->flags & (MF_SOLID | MF_SPAWNCEILING)))
@@ -2066,12 +2168,6 @@ static void gld_DrawSprite(GLSprite *sprite)
     glTexCoord2f(sprite->ul, sprite->vb); glVertex3f(x1, y2, z2);
     glTexCoord2f(sprite->ur, sprite->vb); glVertex3f(x2, y2, z1);
     glEnd();
-  }
-
-  if (restore)
-  {
-    glBlendFunc(blend_src, blend_dst);
-    gld_EndFuzz();
   }
 }
 
@@ -2429,6 +2525,8 @@ void gld_ProcessWall(GLWall *wall)
 {
   seg_t *seg = wall->seg;
 
+  gld_FlushFuzzRun();
+
   // The following code decides where to insert vertices in the left and right
   // sides of a wall polygon so that it precisely shares vertices with adjacent
   // ceilings/floors/walls.  This prevents gaps between polygons from the
@@ -2733,6 +2831,16 @@ void gld_DrawScene(player_t *player)
    * Refer to the discussion below for more detail.
    * https://github.com/coelckers/prboom-plus/pull/262
    */
+  // [PN] Count the world fuzz silhouettes before the pass: with less than two
+  // there is nothing to overlap, so the stencil setup can be skipped entirely
+  fuzz_sprites = 0;
+  for (i = 0; i < gld_drawinfo.num_items[GLDIT_TSPRITE]; ++i)
+  {
+    GLSprite *sprite = gld_drawinfo.items[GLDIT_TSPRITE][i].item.sprite;
+    if (sprite->flags & g_mf_shadow)
+      fuzz_sprites++;
+  }
+
   if (gld_drawinfo.num_items[GLDIT_TWALL] > 0 || gld_drawinfo.num_items[GLDIT_TSPRITE] > 0)
   {
     int twall_idx   = gld_drawinfo.num_items[GLDIT_TWALL] - 1;
@@ -2799,6 +2907,8 @@ void gld_DrawScene(player_t *player)
   glDisableClientState(GL_TEXTURE_COORD_ARRAY);
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_COLOR_ARRAY);
+
+  gld_FlushFuzzRun();
 
   glsl_PopMainShader();
 }

@@ -69,6 +69,7 @@ extern SDL_PixelFormat RGBAFormat;
 extern dboolean gl_ext_texture_filter_anisotropic;
 extern dboolean gl_arb_texture_compression;
 extern dboolean gl_ext_framebuffer_object;
+extern dboolean gl_ext_framebuffer_blit;
 extern dboolean gl_ext_packed_depth_stencil;
 extern dboolean gl_ext_blend_color;
 extern dboolean gl_use_stencil;
@@ -86,6 +87,7 @@ extern PFNGLFRAMEBUFFERTEXTURE2DEXTPROC    GLEXT_glFramebufferTexture2DEXT;
 extern PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC  GLEXT_glCheckFramebufferStatusEXT;
 extern PFNGLDELETEFRAMEBUFFERSEXTPROC      GLEXT_glDeleteFramebuffersEXT;
 extern PFNGLDELETERENDERBUFFERSEXTPROC     GLEXT_glDeleteRenderbuffersEXT;
+extern PFNGLBLITFRAMEBUFFEREXTPROC         GLEXT_glBlitFramebufferEXT;
 
 /* ARB_multitexture command function pointers */
 extern PFNGLACTIVETEXTUREARBPROC           GLEXT_glActiveTextureARB;

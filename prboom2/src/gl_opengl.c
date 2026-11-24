@@ -55,6 +55,7 @@ SDL_PixelFormat RGBAFormat;
 dboolean gl_ext_texture_filter_anisotropic = false;
 dboolean gl_arb_texture_compression = false;
 dboolean gl_ext_framebuffer_object = false;
+dboolean gl_ext_framebuffer_blit = false;
 dboolean gl_ext_packed_depth_stencil = false;
 dboolean gl_ext_blend_color = false;
 dboolean gl_use_stencil = false;
@@ -76,6 +77,7 @@ PFNGLFRAMEBUFFERTEXTURE2DEXTPROC    GLEXT_glFramebufferTexture2DEXT    = NULL;
 PFNGLCHECKFRAMEBUFFERSTATUSEXTPROC  GLEXT_glCheckFramebufferStatusEXT  = NULL;
 PFNGLDELETEFRAMEBUFFERSEXTPROC      GLEXT_glDeleteFramebuffersEXT      = NULL;
 PFNGLDELETERENDERBUFFERSEXTPROC     GLEXT_glDeleteRenderbuffersEXT     = NULL;
+PFNGLBLITFRAMEBUFFEREXTPROC         GLEXT_glBlitFramebufferEXT         = NULL;
 
 /* ARB_multitexture command function pointers */
 PFNGLACTIVETEXTUREARBPROC        GLEXT_glActiveTextureARB              = NULL;
@@ -212,6 +214,25 @@ void gld_InitOpenGL(void)
   }
   if (gl_ext_framebuffer_object)
     lprintf(LO_DEBUG, "using GL_EXT_framebuffer_object\n");
+
+  //
+  // EXT_framebuffer_blit: provides glBlitFramebuffer, which the fuzz scene copy
+  // uses to downscale the smear texture on the GPU. 
+  //
+  gl_ext_framebuffer_blit = gl_ext_framebuffer_object &&
+    (isExtensionSupported("GL_EXT_framebuffer_blit") ||
+     isExtensionSupported("GL_ARB_framebuffer_object"));
+
+  if (gl_ext_framebuffer_blit)
+  {
+    GLEXT_glBlitFramebufferEXT = SDL_GL_GetProcAddress("glBlitFramebufferEXT");
+    if (!GLEXT_glBlitFramebufferEXT)
+      GLEXT_glBlitFramebufferEXT = SDL_GL_GetProcAddress("glBlitFramebuffer");
+    if (!GLEXT_glBlitFramebufferEXT)
+      gl_ext_framebuffer_blit = false;
+  }
+  if (gl_ext_framebuffer_blit)
+    lprintf(LO_DEBUG, "using GL_EXT_framebuffer_blit\n");
 
   gl_ext_packed_depth_stencil = isExtensionSupported("GL_EXT_packed_depth_stencil") != NULL;
   if (gl_ext_packed_depth_stencil)
