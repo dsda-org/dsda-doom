@@ -40,7 +40,7 @@ Most changes should be documented in the next release's patch notes. A simple ne
 
 ### Style
 
-As this codebase has been modified by hundreds of people of 30 years, and never had a defined coding style, you will find that the style changes from file to file and function to function. The current recommendation is to try to blend you code in, try to use the exact format that was in that place. In the future a strict coding style may be required for new code.
+As this codebase has been modified by hundreds of people over 30 years, and never had a defined coding style, you will find that the style changes from file to file and function to function. The current recommendation is to try to blend you code in, try to use the exact format that was in that place. In the future a strict coding style may be required for new code.
 
 Some contributors like to write their initials before a comment, this has been done historically, so it is still allowed, although not encouraged. The date however, is not desired and should no longer be included.
 
