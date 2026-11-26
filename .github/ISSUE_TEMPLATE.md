@@ -10,7 +10,7 @@
 
 <!-- Modify this section to match your environment, and add anything else that might be useful -->
 
-- Version: v0.30.1
+- Version: v0.30.2
 - Renderer: OpenGL
 - OS: Windows 11
 - Source: Official release on GitHub
