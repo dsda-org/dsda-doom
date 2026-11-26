@@ -15,6 +15,7 @@
 //	DSDA Font
 //
 
+#include "lprintf.h"
 #include "r_data.h"
 
 #include "font.h"
@@ -25,17 +26,11 @@ static patchnum_t hu_font2[HU_FONTSIZE];
 dsda_font_t hud_font;
 dsda_font_t exhud_font;
 
-void dsda_InitFont(void) {
-  int i;
-  int j;
+void dsda_InitAllFonts(void) {
   char buffer[9];
 
-  j = HU_FONTSTART;
-  for (i = 0; i < HU_FONTSIZE - 1; i++, j++) {
-    snprintf(buffer, sizeof(buffer), "DIG%.3d", j);
-    R_SetPatchNum(&hu_font2[i], buffer);
-  }
-
+  int i;
+  int j;
   j = HU_FONTSTART;
   for (i = 0; i < HU_FONTSIZE; ++i, ++j) {
     if ('0' <= j && j <= '9') {
@@ -74,10 +69,38 @@ void dsda_InitFont(void) {
   hud_font.start = HU_FONTSTART;
   hud_font.kerning = raven ? -1 : 0;
 
-  exhud_font.font = hu_font2;
-  exhud_font.height = hu_font2['0' - HU_FONTSTART].height;
-  exhud_font.line_height = exhud_font.height + 1;
-  exhud_font.space_width = 5;
-  exhud_font.start = HU_FONTSTART;
-  exhud_font.kerning = 0;
+  exhud_font = dsda_InitFont("DIG", 3);
+}
+
+dsda_font_t dsda_InitFont(const char *lump_match, int suffix_size) {
+  dsda_font_t font;
+  char buffer[9];
+  int i;
+  int j;
+
+  char match_string[16];
+
+  if (strlen(lump_match) + suffix_size > 8)
+    return font;
+
+  snprintf(match_string, sizeof(match_string), "%s%%.%dd", lump_match, suffix_size);
+  lprintf(LO_ERROR, "match_string: %s\n", match_string);
+
+  j = HU_FONTSTART;
+  for (i = 0; i < HU_FONTSIZE - 1; i++, j++) {
+    if ((!raven && j > 96) || (raven && j > 90))
+      break;
+
+    snprintf(buffer, sizeof(buffer), match_string, j);
+    R_SetPatchNum(&hu_font2[i], buffer);
+  }
+
+  font.font = hu_font2;
+  font.height = hu_font2['0' - HU_FONTSTART].height;
+  font.line_height = font.height + 1;
+  font.space_width = 5;
+  font.start = HU_FONTSTART;
+  font.kerning = 0;
+
+  return font;
 }

@@ -28,6 +28,7 @@
 
 #include "dsda/args.h"
 #include "dsda/console.h"
+#include "dsda/font.h"
 #include "dsda/global.h"
 #include "dsda/hud_components.h"
 #include "dsda/render_stats.h"
@@ -346,6 +347,7 @@ typedef struct {
   dboolean loaded;
   exhud_component_t components[exhud_component_count];
   int y_offset[VPT_ALIGN_MAX];
+  dsda_font_t font;
 } dsda_hud_container_t;
 
 typedef enum {
@@ -494,6 +496,19 @@ static int dsda_ParseHUDConfig(char** hud_config, int line_i) {
 
       if (BOTTOM_ALIGNMENT(vpt))
         container->y_offset[vpt] = -container->y_offset[vpt];
+    }
+
+    if (!strncmp(command, "font", sizeof(command))) {
+      char lump_match[7];
+      int suffix_size;
+
+      found = true;
+
+      count = sscanf(args, "%s %d", lump_match, &suffix_size);
+      if (count != 2)
+        I_Error("Invalid hud font \"%s\"", line);
+
+      container->font = dsda_InitFont(lump_match, suffix_size);
     }
 
     if (!found)
