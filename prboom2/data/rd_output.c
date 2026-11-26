@@ -113,7 +113,7 @@ void output_write(const char *filename)
   for (i = numlumps, lump = dir; i; i--, lump++)
   {
     lump->offset = pos;
-    pos += lump->size;
+    pos += (unsigned int)lump->size;
   }
 
   out = fopen(filename, "wb");
@@ -133,7 +133,7 @@ void output_write(const char *filename)
   for (i = numlumps, lump = dir; i; i--, lump++)
   {
     write_u32(out, lump->offset);
-    write_u32(out, lump->size);
+    write_u32(out, (unsigned int)lump->size);
     write_ch8(out, lump->name);
   }
 

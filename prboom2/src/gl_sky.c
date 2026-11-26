@@ -172,7 +172,7 @@ void gld_AddSkyTexture(GLWall *wall, int sky1, int sky2, int skytype)
     {
       // As far as I can tell, textureoffset just adds directly to viewangle and is
       // therefore affected by tiling, but rowoffset is not.
-      wall->skyyaw = (double) (viewangle + s->textureoffset) / (double) ANGLE_MAX;
+      wall->skyyaw = (float)((double) (viewangle + s->textureoffset) / (double) ANGLE_MAX);
       wall->skypitch = skyYShift;
       wall->skyoffset = (((float)s->rowoffset/(float)FRACUNIT - 28.0f)/wall->gltexture->buffer_height);
       wall->flag = l->special == 272 ? GLDWF_SKY : GLDWF_SKYFLIP;
@@ -234,15 +234,15 @@ void gld_SkyTransform(GLWall* wall)
   // software mode)
   float sky_height = 880;
   // Texture dimensions
-  float w = wall->gltexture->buffer_width;
-  float h = wall->gltexture->buffer_height;
+  float w = (float)wall->gltexture->buffer_width;
+  float h = (float)wall->gltexture->buffer_height;
   // Tile factors
   float tilex = sky_width / w;
   float tiley = sky_height / h;
   // Adjustment for tall screens
   float ratio = tallscreen ? (float)ratio_multiplier / ratio_scale : 1.0f;
   // X flip coefficient
-  float flipx = wall->flag == GLDWF_SKYFLIP ? -1.0 : 1.0;
+  float flipx = wall->flag == GLDWF_SKYFLIP ? -1.0f : 1.0f;
   // Scale factors
   float scalex = scale_correction / skyscale * flipx;
   float scaley = scale_correction * ratio * (skystretch ? ( (float)SKYSTRETCH_HEIGHT / h ) : 1.0f) / skyscale;
@@ -595,7 +595,7 @@ static void gld_BuildSky(int row_count, int col_count, SkyBoxParams_t *sky, int 
   for (yflip = 0; yflip < 2; yflip++)
   {
     vbo->loops[vbo->loopcount].mode = GL_TRIANGLE_FAN;
-    vbo->loops[vbo->loopcount].vertexindex = vertex_p - &vbo->data[0];
+    vbo->loops[vbo->loopcount].vertexindex = (int)(vertex_p - &vbo->data[0]);
     vbo->loops[vbo->loopcount].vertexcount = col_count;
     vbo->loops[vbo->loopcount].use_texture = false;
     vbo->loopcount++;
@@ -630,7 +630,7 @@ static void gld_BuildSky(int row_count, int col_count, SkyBoxParams_t *sky, int 
     for(r = 0; r < row_count; r++)
     {
       vbo->loops[vbo->loopcount].mode = GL_TRIANGLE_STRIP;
-      vbo->loops[vbo->loopcount].vertexindex = vertex_p - &vbo->data[0];
+      vbo->loops[vbo->loopcount].vertexindex = (int)(vertex_p - &vbo->data[0]);
       vbo->loops[vbo->loopcount].vertexcount = 2 * col_count + 2;
       vbo->loops[vbo->loopcount].use_texture = true;
       vbo->loopcount++;

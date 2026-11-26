@@ -397,7 +397,7 @@ int P_GetMobj(mobj_t* mi, size_t s)
   size_t i = (size_t)mi;
   if (i >= s)
     I_Error("Corrupt savegame");
-  return i;
+  return (int)i;
 }
 
 static void P_ReplaceIndexWithMobj(mobj_t **mobj, mobj_t **mobj_p, int mobj_count)

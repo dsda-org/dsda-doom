@@ -80,7 +80,7 @@ static char* dsda_SplitTrackerPath(void) {
 
     dir = dsda_SplitTrackerDir();
 
-    length = strlen(dir) + strlen(name_base) + 28;
+    length = (int)(strlen(dir) + strlen(name_base) + 28);
     dsda_split_tracker_path = Z_Malloc(length);
 
     snprintf(
@@ -145,7 +145,7 @@ static void dsda_LoadSplits(void) {
       if (count < 5)
         break;
 
-      i = dsda_splits_count;
+      i = (int)dsda_splits_count;
       dsda_splits = Z_Realloc(dsda_splits, (++dsda_splits_count) * sizeof(dsda_split_t));
       dsda_InitSplitTime(&dsda_splits[i].leveltime);
       dsda_InitSplitTime(&dsda_splits[i].totalleveltimes);

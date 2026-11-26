@@ -191,9 +191,9 @@ static void glsl_ShaderSrcAppendDefine(shader_source_t* src,
   static const char cnl[] = "\n";
 
   glsl_ShaderSrcAppend(src, cdefine, CSLEN(cdefine));
-  glsl_ShaderSrcAppend(src, def->name, strlen(def->name));
+  glsl_ShaderSrcAppend(src, def->name, (int)strlen(def->name));
   glsl_ShaderSrcAppend(src, cspace, CSLEN(cspace));
-  glsl_ShaderSrcAppend(src, def->value, strlen(def->value));
+  glsl_ShaderSrcAppend(src, def->value, (int)strlen(def->value));
   glsl_ShaderSrcAppend(src, cnl, CSLEN(cnl));
 }
 
@@ -215,7 +215,7 @@ static void glsl_ShaderSrcProcess(shader_source_t* src, const GLchar* text,
     // Output any version and extension directives before defines
     if (dsda_StringViewStartsWith(&line, vdir))
     {
-      glsl_ShaderSrcAppend(src, line.string, line.size);
+      glsl_ShaderSrcAppend(src, line.string, (int)line.size);
       continue;
     }
 
@@ -229,7 +229,7 @@ static void glsl_ShaderSrcProcess(shader_source_t* src, const GLchar* text,
       if (dsda_StringViewStartsWith(&cur, iext))
         // Omit include extension from output since we're handling it
         continue;
-      glsl_ShaderSrcAppend(src, line.string, line.size);
+      glsl_ShaderSrcAppend(src, line.string, (int)line.size);
       continue;
     }
 
@@ -266,7 +266,7 @@ static void glsl_ShaderSrcProcess(shader_source_t* src, const GLchar* text,
     }
 
     // Pass line through verbatim
-    glsl_ShaderSrcAppend(src, line.string, line.size);
+    glsl_ShaderSrcAppend(src, line.string, (int)line.size);
   }
 }
 
@@ -467,11 +467,11 @@ static void glsl_ShaderPush(shader_t* shader, ...)
         val->i[0] = va_arg(ap, GLint);
         break;
       case UNIF_1F:
-        val->f[0] = va_arg(ap, double);
+        val->f[0] = (float)va_arg(ap, double);
         break;
       case UNIF_2F:
-        val->f[0] = va_arg(ap, double);
-        val->f[1] = va_arg(ap, double);
+        val->f[0] = (float)va_arg(ap, double);
+        val->f[1] = (float)va_arg(ap, double);
         break;
       default:
         I_Error("ShaderPush: Can't dynamically set texture uniform type");
@@ -525,12 +525,12 @@ static void glsl_ShaderUniform(shader_t* shader, int num, ...)
     GLEXT_glUniform1iARB(idx, val->i[0]);
     break;
   case UNIF_1F:
-    val->f[0] = va_arg(ap, double);
+    val->f[0] = (float)va_arg(ap, double);
     GLEXT_glUniform1fARB(idx, val->f[0]);
     break;
   case UNIF_2F:
-    val->f[0] = va_arg(ap, double);
-    val->f[1] = va_arg(ap, double);
+    val->f[0] = (float)va_arg(ap, double);
+    val->f[1] = (float)va_arg(ap, double);
     GLEXT_glUniform2fARB(idx, val->f[0], val->f[1]);
     break;
   default:

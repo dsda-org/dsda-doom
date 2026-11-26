@@ -404,7 +404,7 @@ dboolean M_WriteFile(char const *name, const void *source, size_t length)
   if (!length)                         // Remove partially written file
     M_remove(name);
 
-  return length;
+  return (dboolean)length;
 }
 
 /*
@@ -428,7 +428,7 @@ int M_ReadFile(char const *name, byte **buffer)
       if (fread(*buffer, 1, length, fp) == length)
         {
           fclose(fp);
-          return length;
+          return (int)length;
         }
       fclose(fp);
     }
@@ -454,7 +454,7 @@ int M_ReadFileToString(char const *name, char **buffer) {
     {
       fclose(fp);
       (*buffer)[length] = '\0';
-      return length;
+      return (int)length;
     }
     Z_Free(*buffer);
     *buffer = NULL;

@@ -78,14 +78,14 @@ void gld_InitLightTable(void)
 
 float gld_Calc2DLightLevel(int lightlevel)
 {
-  return lighttable[usegamma][BETWEEN(0, 255, lightlevel)];
+  return lighttable[usegamma][CLAMP(lightlevel, 0, 255)];
 }
 
 float gld_CalcLightLevel(int lightlevel)
 {
   int light;
 
-  light = BETWEEN(0, 255, lightlevel);
+  light = CLAMP(lightlevel, 0, 255);
 
   return (float)light/255.0f;
 }

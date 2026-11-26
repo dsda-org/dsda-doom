@@ -267,7 +267,7 @@ double dsda_DistancePointToLine(fixed_t line_x1, fixed_t line_y1,
   dy = y2 - y1;
 
   intersect = ((px - x1) * dx + (py - y1) * dy) / (dx * dx + dy * dy);
-  intersect = BETWEEN(0, 1, intersect);
+  intersect = CLAMP(intersect, 0, 1);
   intersect_x = x1 + intersect * dx;
   intersect_y = y1 + intersect * dy;
 
@@ -381,7 +381,7 @@ byte dsda_FloatToPercent(float x)
   return (byte) flr;
 }
 
-int dsda_IntToFixed(int x)
+fixed_t dsda_IntToFixed(int x)
 {
   return (fixed_t) (x << FRACBITS);
 }
@@ -389,5 +389,5 @@ int dsda_IntToFixed(int x)
 // ANG1 is off by 256 / 360 due to rounding
 angle_t dsda_DegreesToAngle(float x)
 {
-  return ANG1 * x + 256 * x / 360;
+  return (angle_t)(ANG1 * x + 256 * x / 360);
 }

@@ -406,7 +406,7 @@ static void P_XYMovement (mobj_t* mo)
               angle = R_PointToAngle2(BlockingMobj->x, BlockingMobj->y, mo->x, mo->y) +
                       ANG1 * ((P_Random(pr_hexen) % 16) - 8);
               speed = P_AproxDistance(mo->momx, mo->momy);
-              speed = FixedMul(speed, 0.75 * FRACUNIT);
+              speed = FixedMul(speed, (fixed_t)(0.75 * FRACUNIT));
               mo->angle = angle;
               angle >>= ANGLETOFINESHIFT;
               mo->momx = FixedMul(speed, finecosine[angle]);
@@ -2548,7 +2548,7 @@ mobj_t* P_SpawnMapThing (const mapthing_t* mthing, int index)
 
   if (!raven && thingtype == 14165 && map_format.hexen)
   {
-    iden_num = BETWEEN(0, 64, mthing->special_args[0]); // Mus change
+    iden_num = CLAMP(mthing->special_args[0], 0, 64); // Mus change
     thingtype = 14164;            // MT_MUSICSOURCE
   }
 
@@ -2747,7 +2747,7 @@ void P_SpawnPuff(fixed_t x,fixed_t y,fixed_t z)
   mobj_t* th;
   int t;
 
-  if (raven) return Raven_P_SpawnPuff(x, y, z);
+  if (raven) RETURN(Raven_P_SpawnPuff(x, y, z));
 
   // killough 5/5/98: remove dependence on order of evaluation:
   t = P_Random(pr_spawnpuff);
@@ -3469,7 +3469,7 @@ void P_FloorBounceMissile(mobj_t * mo)
             case HEXEN_MT_SGSHARD8:
             case HEXEN_MT_SGSHARD9:
             case HEXEN_MT_SGSHARD0:
-                mo->momz = FixedMul(mo->momz, -0.3 * FRACUNIT);
+                mo->momz = FixedMul(mo->momz, (fixed_t)(-0.3 * FRACUNIT));
                 if (abs(mo->momz) < (FRACUNIT / 2))
                 {
                     P_SetMobjState(mo, HEXEN_S_NULL);
@@ -3477,7 +3477,7 @@ void P_FloorBounceMissile(mobj_t * mo)
                 }
                 break;
             default:
-                mo->momz = FixedMul(mo->momz, -0.7 * FRACUNIT);
+                mo->momz = FixedMul(mo->momz, (fixed_t)(-0.7 * FRACUNIT));
                 break;
         }
         mo->momx = 2 * mo->momx / 3;

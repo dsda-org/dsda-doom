@@ -146,7 +146,7 @@ static void xmp_render(void *dest, unsigned nsamp)
     {
       short *sdest = (short *)dest;
 
-      for (int i = 0; i < nsamp * 2; i++)
+      for (int i = 0; i < (int)(nsamp * 2); i++)
       {
         sdest[i] = (short)(sdest[i] * xmp_volume);
       }

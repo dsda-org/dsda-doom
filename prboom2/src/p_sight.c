@@ -209,7 +209,7 @@ dboolean P_SightTraverseIntercepts(void)
   intercept_t *scan, *in;
   divline_t dl;
 
-  count = intercept_p - intercepts;
+  count = (int)(intercept_p - intercepts);
   //
   // calculate intercept distance
   //

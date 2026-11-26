@@ -134,7 +134,7 @@ typedef struct {
 static char *dehfgets(char *buf, size_t n, DEHFILE *fp)
 {
   if (!fp->lump)                                     // If this is a real file,
-    return (fgets)(buf, n, fp->f);                   // return regular fgets
+    return (fgets)(buf, (int)n, fp->f);                   // return regular fgets
   if (!n || !*fp->inp || fp->size <= 0)                // If no more characters
     return NULL;
   if (n == 1)
@@ -163,7 +163,7 @@ static int dehfgetc(DEHFILE *fp)
 
 static long dehftell(DEHFILE *fp)
 {
-  return !fp->lump ? ftell(fp->f) : (fp->inp - fp->lump);
+  return (long)(!fp->lump ? ftell(fp->f) : (fp->inp - fp->lump));
 }
 
 static int dehfseek(DEHFILE *fp, long offset)
@@ -172,8 +172,8 @@ static int dehfseek(DEHFILE *fp, long offset)
     return fseek(fp->f, offset, SEEK_SET);
   else
   {
-    long total = (fp->inp - fp->lump) + fp->size;
-    offset = BETWEEN(0, total, offset);
+    long total = (long)((fp->inp - fp->lump) + fp->size);
+    offset = CLAMP(offset, 0, total);
     fp->inp = fp->lump + offset;
     fp->size = total - offset;
     return 0;
@@ -2298,7 +2298,7 @@ static void deh_procFrame(DEHFILE *fpin, char *line)
         }
       }
 
-      deh_state.state->flags = value;
+      deh_state.state->flags = (int)value;
     }
     else
       deh_log("Invalid frame string index for '%s'\n", key);
@@ -2351,7 +2351,7 @@ static void deh_procPointer(DEHFILE *fpin, char *line) // done
       continue;
     }
 
-    ptr_state = dsda_GetDehState(value);
+    ptr_state = dsda_GetDehState((int)value);
 
     if (!deh_strcasecmp(key, deh_state_fields[4]))  // Codep frame (not set in Frame deh block)
     {
@@ -2553,7 +2553,7 @@ static void deh_procWeapon(DEHFILE *fpin, char *line)
         }
       }
 
-      weaponinfo[indexnum].flags = value;
+      weaponinfo[indexnum].flags = (int)value;
     }
     else
       deh_log("Invalid weapon string index for '%s'\n",key);
@@ -3457,7 +3457,7 @@ void PostProcessDeh(void)
         ti_flags >>= TI_ARGSSHIFT;
         for (args_i = 0; args_i < MAXSTATEARGS; ++args_i)
           if (ti_flags & (1 << args_i))
-            states[i].args[args_i] = dsda_TranslateDehMobjIndex(states[i].args[args_i]);
+            states[i].args[args_i] = dsda_TranslateDehMobjIndex((int)(states[i].args[args_i]));
       }
 
       // Flags specifications aren't cross-port consistent -> must translate / mask bits

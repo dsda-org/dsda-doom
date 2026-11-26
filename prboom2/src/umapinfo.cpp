@@ -520,7 +520,7 @@ static int ParseMapEntry(Scanner &scanner, MapEntry *val)
 
 int ParseUMapInfo(const unsigned char *buffer, size_t length, umapinfo_errorfunc err)
 {
-	Scanner scanner((const char*)buffer, length);
+	Scanner scanner((const char*)buffer, (int)length);
 	unsigned int i;
 
 	scanner.SetErrorCallback(err);

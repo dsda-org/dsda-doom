@@ -374,7 +374,7 @@ static void writeevent (unsigned long when, int eve, int channel, int v1, int v2
 
 static void write_volume (unsigned long when, int channel, int volume)
 {
-  int vol = volume * volume_scale + 0.5f;
+  int vol = (int)(volume * volume_scale + 0.5f);
   writeevent (when, MIDI_EVENT_CONTROLLER, channel, MIDI_CONTROLLER_MAIN_VOLUME, vol);
   channel_volume[channel] = volume;
 }
@@ -621,7 +621,7 @@ static void pm_render (void *vdest, unsigned bufflen)
       eventdelta += mus_portmidi_reset_delay;
 
     // how many we will render (rounding down); include delta offset
-    samples = eventdelta + pm_delta;
+    samples = (unsigned int)(eventdelta + pm_delta);
 
     if (when + samples > newtime)
     {

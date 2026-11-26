@@ -53,7 +53,7 @@ static void dsda_InitTranMapBaseDir(void) {
 
   data_root = dsda_DataRoot();
 
-  length = strlen(data_root) + 10; // "/tranmaps\0"
+  length = (int)(strlen(data_root) + 10); // "/tranmaps\0"
   tranmap_base_dir = Z_Malloc(length);
   snprintf(tranmap_base_dir, length, "%s/tranmaps", data_root);
 
@@ -69,7 +69,7 @@ static void dsda_InitTranMapPaletteDir(void) {
   if (!playpal_cksum.string[0])
     dsda_CalculatePlaypalCksum();
 
-  length = strlen(tranmap_base_dir) + 34; // "/<cksum (32)>\0"
+  length = (int)(strlen(tranmap_base_dir) + 34); // "/<cksum (32)>\0"
   tranmap_palette_dir = Z_Malloc(length);
   snprintf(tranmap_palette_dir, length, "%s/%s", tranmap_base_dir, playpal_cksum.string);
 
@@ -167,7 +167,7 @@ const byte* dsda_TranMap(unsigned int alpha) {
     if (!tranmap_palette_dir)
       dsda_InitTranMapPaletteDir();
 
-    length = strlen(tranmap_palette_dir) + 16; // "/tranmap_99.dat\0"
+    length = (int)(strlen(tranmap_palette_dir) + 16); // "/tranmap_99.dat\0"
     filename = Z_Malloc(length);
     snprintf(filename, length, "%s/tranmap_%02d.dat", tranmap_palette_dir, alpha);
 

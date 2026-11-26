@@ -56,12 +56,12 @@ inline static void* getelem(bmalpool_t *p, size_t size, size_t n)
 inline static PUREFUNC int iselem(const bmalpool_t *pool, size_t size, const void* p)
 {
   // CPhipps - need portable # of bytes between pointers
-  int dif = (const char*)p - (const char*)pool;
+  int dif = (int)((const char*)p - (const char*)pool);
 
   dif -= sizeof(bmalpool_t);
-  dif -= pool->blocks;
+  dif -= (int)pool->blocks;
   if (dif<0) return -1;
-  dif /= size;
+  dif /= (int)size;
   return (((size_t)dif >= pool->blocks) ? -1 : dif);
 }
 
@@ -73,7 +73,7 @@ void* Z_BMalloc(struct block_memory_alloc_s *pzone)
   while (*pool != NULL) {
     byte *p = memchr((*pool)->used, unused_block, (*pool)->blocks); // Scan for unused marker
     if (p) {
-      int n = p - (*pool)->used;
+      int n = (int)(p - (*pool)->used);
 #ifdef SIMPLECHECKS
       if ((n<0) || ((size_t)n>=(*pool)->blocks))
   I_Error("Z_BMalloc: memchr returned pointer outside of array");

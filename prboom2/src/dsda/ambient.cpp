@@ -129,7 +129,7 @@ static void dsda_ParseAmbient(Scanner &scanner) {
 
   scanner.MustGetString();
   if (scanner.StringMatch("point")) {
-    amb_sfx.attenuation = scanner.CheckFloat() ? scanner.decimal : 1.0;
+    amb_sfx.attenuation = (float)(scanner.CheckFloat() ? scanner.decimal : 1.0);
     scanner.MustGetString();
   }
   else if (scanner.StringMatch("world") || scanner.StringMatch("surround")) {
@@ -146,18 +146,18 @@ static void dsda_ParseAmbient(Scanner &scanner) {
   }
   else if (scanner.StringMatch("random")) {
     scanner.MustGetFloat();
-    amb_sfx.min_tics = 35 * scanner.decimal;
+    amb_sfx.min_tics = (int)(35 * scanner.decimal);
     scanner.MustGetFloat();
-    amb_sfx.max_tics = 35 * scanner.decimal;
+    amb_sfx.max_tics = (int)(35 * scanner.decimal);
   }
   else if (scanner.StringMatch("periodic")) {
     scanner.MustGetFloat();
-    amb_sfx.min_tics = 35 * scanner.decimal;
+    amb_sfx.min_tics = (int)(35 * scanner.decimal);
     amb_sfx.max_tics = amb_sfx.min_tics;
   }
 
   scanner.MustGetFloat();
-  amb_sfx.volume = BETWEEN(0.0, 1.0, scanner.decimal);
+  amb_sfx.volume = (float)(CLAMP(scanner.decimal, 0.0, 1.0));
   if (amb_sfx.attenuation < 0)
     amb_sfx.attenuation = 1;
 

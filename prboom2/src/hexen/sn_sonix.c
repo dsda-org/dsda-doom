@@ -250,7 +250,7 @@ void SN_InitSequenceScript(void)
             int dataSize;
 
             *tempDataPtr++ = SS_CMD_END;
-            dataSize = (tempDataPtr - tempDataStart) * sizeof(int);
+            dataSize = (int)((tempDataPtr - tempDataStart) * sizeof(int));
             SequenceData[i] = (int *) Z_Malloc(dataSize);
             memcpy(SequenceData[i], tempDataStart, dataSize);
             Z_Free(tempDataStart);
@@ -434,7 +434,7 @@ void SN_StopAllSequences(void)
 
 int SN_GetSequenceOffset(int sequence, int *sequencePtr)
 {
-    return (sequencePtr -
+    return (int)(sequencePtr -
             SequenceData[SequenceTranslate[sequence].scriptNum]);
 }
 
