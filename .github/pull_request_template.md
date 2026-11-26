@@ -8,7 +8,7 @@
 
 ## Patch notes
 
-<!-- Set v0.30.2 as the milestone of this PR. -->
+<!-- Set v0.30.3 as the milestone of this PR. -->
 <!-- Write here the patch notes for this change. -->
 
 - Fixed every bug ever (@mycoolname)

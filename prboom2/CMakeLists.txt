@@ -5,7 +5,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake")
 # Setup dependencies options before `project()` so vcpkg features can be used
 include(DsdaDepsSetup)
 
-project("dsda-doom" VERSION 0.30.1)
+project("dsda-doom" VERSION 0.30.2)
 
 set(dsda_is_top_project FALSE)
 if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
