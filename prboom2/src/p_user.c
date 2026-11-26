@@ -37,6 +37,7 @@
 
 #include "doomstat.h"
 #include "d_event.h"
+#include "p_mobj.h"
 #include "r_main.h"
 #include "lprintf.h"
 #include "p_map.h"
@@ -1974,7 +1975,7 @@ void P_TeleportOther(mobj_t * victim)
         // If death action, run it upon teleport
         if (victim->flags & MF_COUNTKILL && victim->special)
         {
-            map_format.remove_mobj_thing_id(victim);
+            P_RemoveThingTID(victim);
             map_format.execute_line_special(victim->special, victim->special_args, NULL, 0, victim);
             victim->special = 0;
         }

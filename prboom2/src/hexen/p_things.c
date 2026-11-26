@@ -152,13 +152,11 @@ dboolean EV_ThingProjectile(byte * args, dboolean gravity)
     fixed_t speed;
     fixed_t vspeed;
     mobjtype_t moType;
-    mobj_t *mobj;
+    mobj_t *mobj = NULL;
     mobj_t *newMobj;
-    int searcher;
     dboolean success;
 
     success = false;
-    searcher = -1;
     tid = args[0];
     moType = TranslateThingType[args[1]];
     if ((skill_info.flags & SI_NO_MONSTERS) && (mobjinfo[moType].flags & MF_COUNTKILL))
@@ -169,7 +167,8 @@ dboolean EV_ThingProjectile(byte * args, dboolean gravity)
     fineAngle = angle >> ANGLETOFINESHIFT;
     speed = (int) args[3] << 13;
     vspeed = (int) args[4] << 13;
-    while ((mobj = P_FindMobjFromTID(tid, &searcher)) != NULL)
+
+    while ((mobj = P_FindMobjFromTID(tid, mobj, NULL)))
     {
         newMobj = P_SpawnMobj(mobj->x, mobj->y, mobj->z, moType);
         if (newMobj->info->seesound)
@@ -199,16 +198,14 @@ dboolean EV_ThingSpawn(byte * args, dboolean fog)
 {
     int tid;
     angle_t angle;
-    mobj_t *mobj;
+    mobj_t *mobj = NULL;
     mobj_t *newMobj;
     mobj_t *fogMobj;
     mobjtype_t moType;
-    int searcher;
     dboolean success;
     fixed_t z;
 
     success = false;
-    searcher = -1;
     tid = args[0];
     moType = TranslateThingType[args[1]];
     if ((skill_info.flags & SI_NO_MONSTERS) && (mobjinfo[moType].flags & MF_COUNTKILL))
@@ -216,7 +213,8 @@ dboolean EV_ThingSpawn(byte * args, dboolean fog)
         return false;
     }
     angle = (int) args[2] << 24;
-    while ((mobj = P_FindMobjFromTID(tid, &searcher)) != NULL)
+
+    while ((mobj = P_FindMobjFromTID(tid, mobj, NULL)))
     {
         if (mobjinfo[moType].flags2 & MF2_FLOATBOB)
         {
@@ -254,13 +252,11 @@ dboolean EV_ThingSpawn(byte * args, dboolean fog)
 
 dboolean EV_ThingActivate(int tid)
 {
-    mobj_t *mobj;
-    int searcher;
+    mobj_t *mobj = NULL;
     dboolean success;
 
     success = false;
-    searcher = -1;
-    while ((mobj = P_FindMobjFromTID(tid, &searcher)) != NULL)
+    while ((mobj = P_FindMobjFromTID(tid, mobj, NULL)))
     {
         if (ActivateThing(mobj) == true)
         {
@@ -272,13 +268,11 @@ dboolean EV_ThingActivate(int tid)
 
 dboolean EV_ThingDeactivate(int tid)
 {
-    mobj_t *mobj;
-    int searcher;
+    mobj_t *mobj = NULL;
     dboolean success;
 
     success = false;
-    searcher = -1;
-    while ((mobj = P_FindMobjFromTID(tid, &searcher)) != NULL)
+    while ((mobj = P_FindMobjFromTID(tid, mobj, NULL)))
     {
         if (DeactivateThing(mobj) == true)
         {
@@ -290,13 +284,11 @@ dboolean EV_ThingDeactivate(int tid)
 
 dboolean EV_ThingRemove(int tid)
 {
-    mobj_t *mobj;
-    int searcher;
+    mobj_t *mobj = NULL;
     dboolean success;
 
     success = false;
-    searcher = -1;
-    while ((mobj = P_FindMobjFromTID(tid, &searcher)) != NULL)
+    while ((mobj = P_FindMobjFromTID(tid, mobj, NULL)))
     {
         if (mobj->type == HEXEN_MT_BRIDGE)
         {
@@ -311,13 +303,11 @@ dboolean EV_ThingRemove(int tid)
 
 dboolean EV_ThingDestroy(int tid)
 {
-    mobj_t *mobj;
-    int searcher;
+    mobj_t *mobj = NULL;
     dboolean success;
 
     success = false;
-    searcher = -1;
-    while ((mobj = P_FindMobjFromTID(tid, &searcher)) != NULL)
+    while ((mobj = P_FindMobjFromTID(tid, mobj, NULL)) != NULL)
     {
         if (mobj->flags & MF_SHOOTABLE)
         {
